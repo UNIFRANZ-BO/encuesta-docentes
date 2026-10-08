@@ -37,8 +37,9 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
   - 10 Retroalimentación: el Excel decía «escala 1 a 5» pero da 4 momentos → **opción única** con esos 4 textos.
   - 13 A quién acudes: múltiple (4 opciones). 14: abierta opcional (1000).
   - RRDDTT 1: múltiple, 10 categorías, sin máximo. RRDDTT 2: múltiple, **solo muestra lo marcado en RRDDTT 1** (si se desmarca algo en 1, se quita de 2).
-  - RRDDTT 3: escala 1–5 con las 5 frecuencias del instrumento (1 = No los utilizo … 5 = En todas o casi todas las clases).
-  - RRDDTT 4: escala 1–5 Nada/Poco/Moderadamente/Bastante/Mucho + botón aparte «No los he utilizado» (se guarda como texto y no cuenta en el promedio).
+  - RRDDTT 3 y 4: tipo **`level`** (08-oct-2026, a pedido de Rafael: la escala con círculos 1–5 más la lista de textos resultaba ambigua). Una sola lista de opciones con letra y un medidor de rayas, **sin números**, en el orden del instrumento. Se sigue guardando 1–5 (1 = mínimo).
+    - RRDDTT 3: En todas o casi todas las clases (5) … No los utilizo (1).
+    - RRDDTT 4: Nada (1) … Mucho (5) + «No los he utilizado» (se guarda como texto y no cuenta en el promedio).
   - RRDDTT 5: abierta opcional (500).
 - RESPUESTAS: múltiples = columna de texto «A | B» + una columna 0/1 por opción (`3.1 …`, `13.1 …`, `RRDDTT 1.1 …`, `RRDDTT 2.1 …`). RESUMEN suma esas columnas.
 
@@ -50,7 +51,7 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 
 ## Publicación
 - **URL del script:** implementación `AKfycbxu8VQnHKLX…tl53` (08-oct-2026), incrustada en `API_URL_DEFECTO`.
-- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=1**
+- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=2** (v=2 desde el cambio de RRDDTT 3 y 4)
 - Guía PDF del administrador: `entregables/Guia_hoja_encuesta_docentes.pdf` (generada con `python docs/tutorial/build_pdf.py`; `docs/tutorial/` y `entregables/` no van al repo).
 
 ## Estado y pendientes (08-oct-2026)

@@ -45,7 +45,7 @@ async def main():
         assert 'No encontramos' in await pg.inner_text('#mailMsg')
         await pg.fill('#mailIn', 'DOC.JuanPerez.Lopez.ga@unifranz.edu.bo '); await pg.click('#btnVerify'); await pg.wait_for_timeout(2600)
         assert await pg.evaluate("STEPS[S.i].k") == 'm2'
-        ANS = {'p06': 4, 'p07': 5, 'p08': 4, 'p09': 2, 'p11': 3, 'p12': 4, 'r03': 4}
+        ANS = {'p06': 4, 'p07': 5, 'p08': 4, 'p09': 2, 'p11': 3, 'p12': 4}
         for _ in range(40):
             k = await pg.evaluate("STEPS[S.i].k")
             if k == 'review': break
@@ -63,9 +63,14 @@ async def main():
             elif k == 'r02':
                 assert await pg.locator('.opt').count() == 3, 'r02 debe mostrar solo lo marcado en r01'
                 for i in [1, 8]: await pg.click(f'.opt[data-i="{i}"]')
+            elif k == 'r03':
+                assert await pg.locator('.opt').count() == 5 and await pg.locator('.orb').count() == 0, 'r03: 5 opciones de texto, sin números'
+                assert (await pg.inner_text('.opt >> nth=0')).find('En todas o casi todas') >= 0, 'r03 en el orden del instrumento'
+                await pg.click('.opt[data-n="4"]')
             elif k == 'r04':
-                await pg.click('.slabels li[data-n="2"]'); assert await pg.evaluate("S.a.r04") == 2
-                await pg.click('.nabtn'); assert await pg.evaluate("S.a.r04") == 'NA'
+                assert await pg.locator('.opt').count() == 6, 'r04: 5 niveles + No los he utilizado'
+                await pg.click('.opt[data-n="2"]'); assert await pg.evaluate("S.a.r04") == 2
+                await pg.click('.opt[data-n="NA"]'); assert await pg.evaluate("S.a.r04") == 'NA'
             await pg.wait_for_timeout(700)
             await pg.screenshot(path=str(SHOTS / f'{W}_{k}.png'))
             if k == 'r02':   # volver a r01, desmarcar una opción usada y comprobar que r02 se poda

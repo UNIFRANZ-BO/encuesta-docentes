@@ -276,17 +276,11 @@ button{font:inherit;color:inherit}
 .duo .opt.si.sel{box-shadow:0 0 0 1.5px var(--g) inset,0 0 34px -6px rgba(57,255,176,.65)}
 .duo .opt.no.sel{box-shadow:0 0 0 1.5px var(--r) inset,0 0 34px -6px rgba(255,61,110,.65);background:linear-gradient(135deg,rgba(255,61,110,.2),rgba(255,122,46,.12))}
 .duo .opt.no.sel .chk{background:var(--r);border-color:var(--r);box-shadow:0 0 14px var(--r)}
-.slabels{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px;width:100%;max-width:470px}
-.slabels li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13.5px;color:var(--mut);cursor:pointer;transition:all .25s}
-.slabels li b{flex:none;width:24px;height:24px;display:grid;place-items:center;border-radius:7px;font:700 11px var(--fd);color:var(--txt);border:1px solid rgba(255,255,255,.18)}
-.slabels li:hover{color:var(--txt);border-color:rgba(0,229,255,.35)}
-.slabels li.on{color:var(--txt);border-color:var(--vc);background:rgba(255,255,255,.07);box-shadow:0 0 18px -8px var(--vc)}
-.slabels li.on b{background:var(--vc);border-color:var(--vc);color:#05060f}
-.nabtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:12px;padding:12px 14px;border-radius:14px;border:1px dashed rgba(163,172,212,.4);background:transparent;color:var(--mut);font:600 14px var(--fb);cursor:pointer;transition:all .25s}
-.nabtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .25s}
-.nabtn:hover{color:var(--txt);border-color:rgba(0,229,255,.5)}
-.nabtn.sel{color:var(--txt);border-style:solid;border-color:var(--c);background:rgba(0,229,255,.08);box-shadow:0 0 22px -8px var(--c)}
-.nabtn.sel svg{opacity:1}
+.opt .lvm{flex:none;display:flex;align-items:flex-end;gap:3px;width:27px;height:21px}
+.opt .lvm i{width:4.5px;border-radius:2px;background:rgba(255,255,255,.14);transition:all .3s}
+.opt .lvm i.on{background:var(--lc);box-shadow:0 0 6px var(--lc)}
+.opt.lv.na{border-style:dashed}
+.opt.lv.na.sel{border-style:solid}
 .duo .opt.info.sel{box-shadow:0 0 0 1.5px var(--y) inset,0 0 34px -6px rgba(255,210,61,.6)}
 .opts.full .opt:not(.sel){opacity:.42;filter:saturate(.4)}
 .opts.full .opt:not(.sel):hover{opacity:.6}
@@ -565,10 +559,11 @@ const CAT_DID = [
 const SAT = {lo:'Nada satisfecho', hi:'Totalmente satisfecho', viz:'face'};
 const ACU = {lo:'Nada de acuerdo', hi:'Totalmente de acuerdo', viz:'gauge'};
 const FRQ = {lo:'Nunca', hi:'Siempre', viz:'bars'};
-// Escalas con una etiqueta por valor (del instrumento). `na` = opción aparte que no cuenta en el promedio.
-const USO = {labels:['No los utilizo','Menos de una vez al mes','Aproximadamente una vez al mes','Varias veces al mes','En todas o casi todas las clases'], viz:'bars'};
-const MED = {labels:['Nada','Poco','Moderadamente','Bastante','Mucho'], viz:'gauge', na:'No los he utilizado'};
-[USO, MED].forEach(s => { s.lo = s.labels[0]; s.hi = s.labels[4]; });
+// Preguntas «de nivel»: una lista de opciones con texto (sin números). `labels[v-1]` es el texto del valor v
+// (1 = mínimo, 5 = máximo, que es lo que se guarda); `order` es el orden en que se muestran, el del instrumento.
+// `na` = opción aparte que no cuenta en el promedio.
+const USO = {labels:['No los utilizo','Menos de una vez al mes','Aproximadamente una vez al mes','Varias veces al mes','En todas o casi todas las clases'], order:[5,4,3,2,1]};
+const MED = {labels:['Nada','Poco','Moderadamente','Bastante','Mucho'], order:[1,2,3,4,5], na:'No los he utilizado'};
 const NA = 'NA';
 const VCOL = ['#ff3d6e','#ff7a2e','#ffd23d','#39ffb0','#00e5ff'];
 
@@ -597,8 +592,8 @@ const STEPS = [
   {k:'m3', kind:'intro', mod:2},
   {k:'r01', kind:'multi', mod:2, src:'R', n:1, t:'¿Qué recursos didácticos y digitales están incluidos en el diseño instruccional de tus asignaturas?', hint:'Marca todos los que correspondan.', opts:CAT_TEC},
   {k:'r02', kind:'multi', mod:2, src:'R', n:2, t:'De los recursos incluidos en el diseño instruccional, ¿cuáles utilizas efectivamente en tus clases?', hint:'Aparecen solo los que marcaste en la pregunta anterior.', opts:CAT_TEC, from:'r01'},
-  {k:'r03', kind:'scale', mod:2, src:'R', n:3, t:'¿Con qué frecuencia utilizas los recursos didácticos y digitales incluidos en el diseño instruccional?', sc:USO},
-  {k:'r04', kind:'scale', mod:2, src:'R', n:4, t:'¿En qué medida los recursos que utilizas te ayudan a desarrollar las actividades de enseñanza y aprendizaje previstas en el diseño instruccional?', sc:MED},
+  {k:'r03', kind:'level', mod:2, src:'R', n:3, t:'¿Con qué frecuencia utilizas los recursos didácticos y digitales incluidos en el diseño instruccional?', sc:USO},
+  {k:'r04', kind:'level', mod:2, src:'R', n:4, t:'¿En qué medida los recursos que utilizas te ayudan a desarrollar las actividades de enseñanza y aprendizaje previstas en el diseño instruccional?', sc:MED},
   {k:'r05', kind:'open', mod:2, src:'R', n:5, t:'Tienes sugerencias de algún recursos tecnológicos/didácticos y/o Comentarios', opt:true, max:500, short:true, ph:'Escribe aquí tu sugerencia o comentario…'},
   {k:'review', kind:'review', mod:2}
 ];
@@ -634,7 +629,8 @@ function podar(k) {
 function fmtAns(st) {
   const v = S.a[st.k];
   if (st.kind === 'multi') return (v || []).map(i => st.opts[i].n).join(' · ');
-  if (st.kind === 'scale') return v === NA ? st.sc.na : v ? v + ' / 5' + (st.sc.labels ? ' — ' + st.sc.labels[v - 1] : v == 1 ? ' — ' + st.sc.lo : v == 5 ? ' — ' + st.sc.hi : '') : '';
+  if (st.kind === 'level') return v === NA ? st.sc.na : v ? st.sc.labels[v - 1] : '';
+  if (st.kind === 'scale') return v ? v + ' / 5' + (v == 1 ? ' — ' + st.sc.lo : v == 5 ? ' — ' + st.sc.hi : '') : '';
   return v || '';
 }
 
@@ -745,6 +741,8 @@ function render(el, st) {
     body = `<div class="duo"><span class="vs">${st.numbered ? 'VS' : 'O'}</span>${st.opts.map((o, i) => `<button class="opt ${v === o ? 'sel' : ''} ${st.icons[i]}" data-v="${esc(o)}" aria-pressed="${v === o}" ${optDelay(i)} ${i === 0 ? 'data-autofocus' : ''}><span class="key">${i + 1}</span>${IC[st.icons[i]]}<span class="lbl">${st.numbered ? (i + 1) + '. ' : ''}${esc(o)}</span><span class="chk">${IC.check}</span></button>`).join('')}</div>`;
   } else if (st.kind === 'scale') {
     body = scaleHtml(st, v);
+  } else if (st.kind === 'level') {
+    body = levelHtml(st, v);
   } else if (st.kind === 'multi') {
     const vis = multiOpts(st), arr = (v || []).filter(i => vis.includes(i)), mx = st.max || vis.length;
     body = `<div class="mcount"><b id="mc">${arr.length}</b> de ${mx} seleccionadas <span class="dots">${Array.from({length:mx}, (_, i) => `<i class="${i < arr.length ? 'on' : ''}"></i>`).join('')}</span></div>
@@ -752,7 +750,7 @@ function render(el, st) {
   } else if (st.kind === 'open') {
     body = `<div class="tx"><textarea id="txIn" class="${st.short ? 'short' : ''}" maxlength="${st.max}" placeholder="${esc(st.ph)}" data-autofocus>${esc(v || '')}</textarea><span class="cnt"><span id="txC">${(v || '').length}</span> / ${st.max}</span></div>`;
   }
-  const kb = st.kind === 'scale' ? 'Teclas 1–5 · Enter' : st.kind === 'binary' ? 'Teclas 1–2' : (st.kind === 'choice' ? 'Teclas A–' + keyL(st.opts.length - 1) + ' · Enter' : (st.kind === 'open' ? '' : 'Enter para continuar'));
+  const kb = st.kind === 'scale' ? 'Teclas 1–5 · Enter' : st.kind === 'binary' ? 'Teclas 1–2' : (st.kind === 'choice' ? 'Teclas A–' + keyL(st.opts.length - 1) + ' · Enter' : st.kind === 'level' ? 'Teclas A–' + keyL(st.sc.order.length - (st.sc.na ? 0 : 1)) + ' · Enter' : (st.kind === 'open' ? '' : 'Enter para continuar'));
   el.innerHTML = `<div class="card">${qHead(st)}${body}${navHtml(st, kb ? `<span class="kbd">${kb}</span>` : '')}</div>`;
   bind(el, st);
   tilt($('.card', el));
@@ -821,7 +819,6 @@ async function validarCorreo(correo) {
 
 /* escala con visual dinámico */
 function scaleHtml(st, v) {
-  const isNA = v === NA; if (isNA) v = 0;
   const vc = v ? VCOL[v - 1] : '#00e5ff';
   let viz;
   if (st.sc.viz === 'face') viz = `<svg viewBox="0 0 120 120" id="viz"><defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" id="fgs" stop-color="${vc}"/></linearGradient></defs>
@@ -839,16 +836,20 @@ function scaleHtml(st, v) {
         ${[0,1,2,3,4].map(k => { const a = Math.PI * (1 - k / 4); return `<text x="${100 + 58 * Math.cos(a)}" y="${108 - 58 * Math.sin(a)}" text-anchor="middle" font-family="Orbitron,monospace" font-size="10" font-weight="700" fill="#a3acd4">${k + 1}</text>`; }).join('')}
         <g id="needle" style="transform-origin:100px 104px;transform:rotate(${v ? -90 + (v - 1) * 45 : -90}deg);transition:transform .8s cubic-bezier(.34,1.56,.64,1)"><path d="M97 104 L100 34 L103 104 Z" fill="#fff" opacity="${v ? 1 : .18}" id="ndl"/><circle cx="100" cy="34" r="4" fill="${vc}" id="ntip"/></g>
         <circle cx="100" cy="104" r="10" fill="#0a0d22" stroke="${vc}" stroke-width="3" id="hub"/></svg>`;
-  const L = st.sc.labels;
-  const orbs = [1,2,3,4,5].map(n => `<button class="orb ${v === n ? 'sel' : ''} ${v && n <= v ? 'lit' : ''}" data-n="${n}" style="--oc:${VCOL[n - 1]};animation-delay:${300 + n * 70}ms" aria-label="${n}${L ? ' — ' + L[n - 1] : n === 1 ? ' — ' + st.sc.lo : n === 5 ? ' — ' + st.sc.hi : ''}" aria-pressed="${v === n}" ${n === 1 ? 'data-autofocus' : ''}>${n}</button>`).join('');
+  const orbs = [1,2,3,4,5].map(n => `<button class="orb ${v === n ? 'sel' : ''} ${v && n <= v ? 'lit' : ''}" data-n="${n}" style="--oc:${VCOL[n - 1]};animation-delay:${300 + n * 70}ms" aria-label="${n}${n === 1 ? ' — ' + st.sc.lo : n === 5 ? ' — ' + st.sc.hi : ''}" aria-pressed="${v === n}" ${n === 1 ? 'data-autofocus' : ''}>${n}</button>`).join('');
   return `<div class="scale" style="--vc:${vc}"><div class="viz"><div class="halo"></div>${viz}</div>
-    <div class="readout ${v || isNA ? '' : 'idle'}" id="ro">${isNA ? esc(st.sc.na) : v ? esc(readout(st, v)) : 'Elige un valor'}</div>
+    <div class="readout ${v ? '' : 'idle'}" id="ro">${v ? readout(st, v) : 'Elige un valor'}</div>
     <div class="rail"><div class="track"><div class="tfill" id="tf" style="width:${v ? (v - 1) * 25 : 0}%;--f:${v ? Math.max((v - 1) / 4, .001) : 1}"></div></div><div class="orbs">${orbs}</div></div>
-    ${L ? `<ol class="slabels">${L.map((t, i) => `<li data-n="${i + 1}" class="${v === i + 1 ? 'on' : ''}"><b>${i + 1}</b>${esc(t)}</li>`).join('')}</ol>`
-      : `<div class="anchors"><span><b>1</b>= ${esc(st.sc.lo)}</span><span><b>5</b>= ${esc(st.sc.hi)}</span></div>`}
-    ${st.sc.na ? `<button class="nabtn ${isNA ? 'sel' : ''}" aria-pressed="${isNA}">${IC.check}<span>${esc(st.sc.na)}</span></button>` : ''}</div>`;
+    <div class="anchors"><span><b>1</b>= ${esc(st.sc.lo)}</span><span><b>5</b>= ${esc(st.sc.hi)}</span></div></div>`;
 }
-function readout(st, v) { return st.sc.labels ? v + ' · ' + st.sc.labels[v - 1] : v === 1 ? '1 · ' + st.sc.lo : v === 5 ? '5 · ' + st.sc.hi : v + ' de 5'; }
+function readout(st, v) { return v === 1 ? '1 · ' + st.sc.lo : v === 5 ? '5 · ' + st.sc.hi : v + ' de 5'; }
+// Pregunta de nivel: opciones con letra (A, B…) y un medidor de 4 rayas (0 rayas = mínimo, 4 = máximo).
+function levelHtml(st, v) {
+  const meter = n => `<span class="lvm" style="--lc:${VCOL[n - 1]}">${[1,2,3,4].map(k => `<i class="${k <= n - 1 ? 'on' : ''}" style="height:${5 + k * 4}px"></i>`).join('')}</span>`;
+  const items = st.sc.order.map((n, j) => `<button class="opt lv ${v === n ? 'sel' : ''}" data-n="${n}" aria-pressed="${v === n}" ${optDelay(j)} ${j === 0 ? 'data-autofocus' : ''}><span class="key">${keyL(j)}</span>${meter(n)}<span class="lbl">${esc(st.sc.labels[n - 1])}</span><span class="chk">${IC.check}</span></button>`);
+  if (st.sc.na) items.push(`<button class="opt lv na ${v === NA ? 'sel' : ''}" data-n="${NA}" aria-pressed="${v === NA}" ${optDelay(items.length)}><span class="key">${keyL(items.length)}</span><span class="lvm"></span><span class="lbl">${esc(st.sc.na)}</span><span class="chk">${IC.check}</span></button>`);
+  return `<div class="opts">${items.join('')}</div>`;
+}
 let faceK = 0, faceAnim = null;
 function setFace(target, vc) {
   const m = $('#mouth'); if (!m) return;
@@ -906,9 +907,18 @@ function bind(el, st) {
     const v0 = typeof S.a[st.k] === 'number' ? S.a[st.k] : 0;
     faceK = 0; if (st.sc.viz === 'face') setFace(v0 ? (v0 - 3) * 11 : 0, v0 ? VCOL[v0 - 1] : '#00e5ff');
     el.addEventListener('click', e => {
-      if (e.target.closest('.nabtn')) return pickNA(el, st);
-      const b = e.target.closest('.orb, .slabels li'); if (!b) return;
+      const b = e.target.closest('.orb'); if (!b) return;
       pickScale(el, st, +b.dataset.n, e.clientX, e.clientY);
+    });
+  }
+  if (st.kind === 'level') {
+    el.addEventListener('click', e => {
+      const b = e.target.closest('.opt'); if (!b) return;
+      const n = b.dataset.n === NA ? NA : +b.dataset.n;
+      S.a[st.k] = n;
+      $$('.opt', el).forEach(x => { const on = x === b; x.classList.toggle('sel', on); x.setAttribute('aria-pressed', on); });
+      ripple(b, e); FX.burst(e.clientX || b.getBoundingClientRect().left + 40, e.clientY || b.getBoundingClientRect().top + 20, 14, n === NA ? '#a3acd4' : VCOL[n - 1]);
+      saveDraft(); refreshNext(st); autoNext();
     });
   }
   if (st.kind === 'open') {
@@ -928,25 +938,8 @@ function pickScale(el, st, n, x, y) {
     const w = $('#wave', el); w.setAttribute('stroke', vc); w.setAttribute('opacity', .7);
   }
   else { $('#needle').style.transform = `rotate(${-90 + (n - 1) * 45}deg)`; $('#ndl').setAttribute('opacity', 1); $('#ntip').setAttribute('fill', vc); $('#hub').setAttribute('stroke', vc); }
-  $$('.slabels li', el).forEach(li => li.classList.toggle('on', +li.dataset.n === n));
-  const na = $('.nabtn', el); if (na) { na.classList.remove('sel'); na.setAttribute('aria-pressed', false); }
   if (x === undefined) { const r = $(`.orb[data-n="${n}"]`, el).getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; }
   FX.burst(x, y, 10 + n * 5, vc);
-  saveDraft(); refreshNext(st); autoNext(900);
-}
-// Opción aparte de la escala (ej. «No los he utilizado»): apaga el visual y no suma al promedio.
-function pickNA(el, st) {
-  S.a[st.k] = NA; const vc = '#00e5ff';
-  $('.scale', el).style.setProperty('--vc', vc);
-  $$('.orb', el).forEach(o => { o.classList.remove('sel', 'lit'); o.setAttribute('aria-pressed', false); });
-  $$('.slabels li', el).forEach(li => li.classList.remove('on'));
-  const tf = $('#tf', el); tf.style.width = '0%'; tf.style.setProperty('--f', 1);
-  const ro = $('#ro', el); ro.classList.remove('idle'); ro.textContent = st.sc.na;
-  if (st.sc.viz === 'face') setFace(0, vc);
-  else if (st.sc.viz === 'bars') $$('.fbar', el).forEach(b => { b.style.fill = 'rgba(255,255,255,.08)'; b.style.filter = 'none'; });
-  else { $('#needle').style.transform = 'rotate(-90deg)'; $('#ndl').setAttribute('opacity', .18); $('#ntip').setAttribute('fill', vc); $('#hub').setAttribute('stroke', vc); }
-  const b = $('.nabtn', el); b.classList.add('sel'); b.setAttribute('aria-pressed', true);
-  const r = b.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, 14, vc);
   saveDraft(); refreshNext(st); autoNext(900);
 }
 function ripple(b, e) {
@@ -975,7 +968,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.target.closest('button')) { e.preventDefault(); return st.kind === 'review' ? null : next(); }
   if (e.key === 'Backspace' && st.src) { e.preventDefault(); return prev(); }
   if (st.kind === 'scale' && /^[1-5]$/.test(e.key)) return pickScale(el, st, +e.key);
-  if (st.kind === 'choice' && /^[a-z]$/i.test(e.key)) { const i = e.key.toUpperCase().charCodeAt(0) - 65; const b = $$('.opt', el)[i]; if (b) b.click(); }
+  if ((st.kind === 'choice' || st.kind === 'level') && /^[a-z]$/i.test(e.key)) { const i = e.key.toUpperCase().charCodeAt(0) - 65; const b = $$('.opt', el)[i]; if (b) b.click(); }
   if (st.kind === 'binary' && /^[12]$/.test(e.key)) $$('.opt', el)[+e.key - 1].click();
 });
 
