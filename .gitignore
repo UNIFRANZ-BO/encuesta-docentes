@@ -6,3 +6,4 @@ tests/.check.js
 __pycache__/
 .DS_Store
 docs/tutorial/
+entregables/
