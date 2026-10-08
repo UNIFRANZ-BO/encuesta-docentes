@@ -48,12 +48,18 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 - `GET ?action=verificar&id=` → `{ok, existe}`
 - `POST {action:'guardar', data:{id, correo, …, p03, p03_idx, p04, p05, p06…p12, p13, p13_idx, p14, r01, r01_idx, r02, r02_idx, r03, r04 (1–5 o 'NA'), r05, dur_s, movil, fecha_local, version}}`. El script usa los `_idx` y valida los textos contra sus catálogos; sede/carrera/plan salen del padrón.
 
+## Publicación
+- **URL del script:** implementación `AKfycbxu8VQnHKLX…tl53` (08-oct-2026), incrustada en `API_URL_DEFECTO`.
+- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=1**
+- Guía PDF del administrador: `entregables/Guia_hoja_encuesta_docentes.pdf` (generada con `python docs/tutorial/build_pdf.py`; `docs/tutorial/` y `entregables/` no van al repo).
+
 ## Estado y pendientes (08-oct-2026)
-- [x] App v1.0 y script v1.0 escritos; pruebas locales OK (390 px, 1366 px, hoja simulada en inglés y español).
-- [ ] Rafael pega el script en la hoja de docentes, corre `configuracionInicial`, implementa y pasa la URL `/exec`.
-- [ ] Incrustar la URL en `API_URL_DEFECTO`, crear repo `UNIFRANZ-BO/encuesta-docentes` + Pages, repartir `?v=1`.
-- [ ] Prueba real (ping, fila de prueba, correo real de P26, anular, borrar pruebas).
-- [ ] Adaptar la guía PDF (`docs/tutorial/`).
+- [x] App v1.0 y script v1.0; pruebas locales OK (390 px, 1366 px, hoja simulada en inglés y español).
+- [x] Script instalado en la hoja: `configuracionInicial` → **239 docentes** habilitados (LPZ 79, EAT 67, CBB 55, SCZ 38), sin códigos de carrera nuevos.
+- [x] Publicado en Pages; ping desde la app publicada OK; fila `PRUEBA-MUZZ97LQ` escrita y verificada en RESPUESTAS (columnas correctas, RESUMEN la excluye).
+- [x] Guía PDF adaptada (23 páginas).
+- [ ] Rafael: respuesta real con un correo de P26, revisar RESPUESTAS/PADRON/RESUMEN, anular, **Borrar filas de prueba**. RESPUESTAS debe quedar vacía antes de difundir.
+- [ ] Pendiente de decisión: ¿opción «Ninguno» en RRDDTT 2?
 
 ## Comandos
 ```bash
