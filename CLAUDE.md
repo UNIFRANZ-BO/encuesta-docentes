@@ -22,8 +22,10 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 
 ## Decisiones
 - **Población:** docentes del **plan 2026**, con su correo docente `@unifranz.edu.bo` (formato `doc.nombre.apellido.xx@…`).
-- **Hoja:** «Copia de Base de datos Docentes 1er semestre P2026», id `1Oc6AAqNByXPWsipnS1rudA-hQAP68qxBO-SsPkEwET8`, configuración regional es_ES (fórmulas con `;`, lo resuelve `fx_`). El script va **ligado a esta hoja**.
-- **Base:** pestaña **P26** (~265 docentes, uno por fila): `Docente` (nombre completo en mayúsculas), `CI`, `Sede`, `Carrera`, `Email`, `Plan de estudios`. Las pestañas `Filtrado3/6/7/8` (una fila por docente × asignatura, todos los planes) **no se usan**. CONFIG → Pestañas de origen = `P26`, Planes habilitados = `2026`. La base no tiene semestre ni modalidad: esos filtros se quitaron de CONFIG.
+- **Hoja (desde 22-oct-2026):** «Encuestas docentes Unifranz» en la cuenta **@unifranz** (`rafael.aramayo@unifranz.edu.bo`), id `1WiSS7_0xsmErRF15VP6EW42127GxNgSUFFP2Pv6L058`, es_ES (fórmulas con `;`, lo resuelve `fx_`). El script va **ligado a esta hoja**. La pestaña P26 la cargué yo desde `base docentes.xlsx` (Escritorio, hoja BASEDEDATOSDOC; encabezado `Plan_estudios` renombrado a «Plan de estudios», que es el alias que reconoce el script). Hay una «Hoja 1» vacía que no se usa.
+  - Hoja anterior (cuenta personal, ya no se usa, respaldo): «Copia de Base de datos Docentes 1er semestre P2026», `1Oc6AAqNByXPWsipnS1rudA-hQAP68qxBO-SsPkEwET8`, script `AKfycbxu8VQnHKLX…tl53`.
+  - **Los conectores de Google (Sheets y Drive) de Claude ahora están en la cuenta @unifranz**: ya no ven la hoja personal.
+- **Base:** pestaña **P26** (239 docentes, uno por fila): `Docente` (nombre completo en mayúsculas), `CI`, `Sede`, `Carrera`, `Email`, `Plan de estudios`. Las pestañas `Filtrado3/6/7/8` (una fila por docente × asignatura, todos los planes) **no se usan**. CONFIG → Pestañas de origen = `P26`, Planes habilitados = `2026`. La base no tiene semestre ni modalidad: esos filtros se quitaron de CONFIG.
 - Preguntas 1 (Sede) y 2 (Carrera) **no se muestran**: salen de P26 (si un docente dicta en varias carreras, cuenta la de P26).
 - Payload de perfil: `validar` devuelve `docente:{nombre, sede, sede_nombre, carrera_cod, carrera, plan}` (antes `estudiante`). IDs `DO-…`.
 - Claves locales: `encdoc_draft1`, `encdoc_cola1` (distintas de la encuesta de estudiantes).
@@ -50,16 +52,15 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 - `POST {action:'guardar', data:{id, correo, …, p03, p03_idx, p04, p05, p06…p12 (p10 = 1–5), p13, p13_idx, p14, r01, r01_idx, r02, r02_idx, r02_ninguno, r03, r04 (1–5 o 'NA'), r05, dur_s, movil, fecha_local, version}}`. El script usa los `_idx` y valida los textos contra sus catálogos; sede/carrera/plan salen del padrón.
 
 ## Publicación
-- **URL del script:** implementación `AKfycbxu8VQnHKLX…tl53` (08-oct-2026), incrustada en `API_URL_DEFECTO`.
-- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=2** (v=2 desde el cambio de RRDDTT 3 y 4)
+- **URL del script:** implementación `AKfycbxnS5AIBBrpoV…q59Wg` (cuenta @unifranz, 22-oct-2026), incrustada en `API_URL_DEFECTO`.
+- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=3** (v=3: v1.1 + hoja @unifranz)
 - Guía PDF del administrador: `entregables/Guia_hoja_encuesta_docentes.pdf` (generada con `python docs/tutorial/build_pdf.py`; `docs/tutorial/` y `entregables/` no van al repo).
 
 ## Estado y pendientes (22-oct-2026)
-- [x] v1.0 publicada (08-oct) con la hoja de la cuenta personal: 239 docentes, 0 respuestas reales.
-- [x] **v1.1 lista en local** (app + script, pruebas OK: hoja simulada en inglés/español, recorridos 390 normal, 390 «Ninguno» y 1366). **No publicada**: la app v1.1 contra el script v1.0 dejaría en blanco p05, p10 y «Ninguno».
-- [ ] **Mudanza a la cuenta @unifranz** (`rafael.aramayo@unifranz.edu.bo`): Rafael pega `entregables/Codigo_Encuesta_Docentes.txt` (v1.1) en la hoja de la base de docentes de esa cuenta, `configuracionInicial`, revisa CONFIG (Pestañas de origen = P26), Nueva implementación → pasa la URL.
-- [ ] Con la URL: incrustarla, `git push` (publica) y repartir **`?v=3`**; ping + fila de prueba; actualizar el enlace y la URL en la guía PDF.
-- [ ] Después: en la hoja vieja (cuenta personal) **Encuesta → Cerrar encuesta** y dejarla como respaldo.
+- [x] v1.1 (Excel nuevo + redacción + retroalimentación en escala + «Ninguno») publicada con la hoja @unifranz. Pruebas OK (hoja simulada inglés/español; recorridos 390, 390 «Ninguno», 1366).
+- [x] Hoja @unifranz: script v1.1, P26 con 239 docentes, CONFIG «Pestañas de origen» = P26. `validar` reconoce a los docentes (búsqueda en vivo en P26).
+- [ ] **Rafael: Encuesta → Actualizar padrón** (aún no ejecutado: PADRON vacío → RESUMEN sin habilitados ni cobertura). Debe decir 239.
+- [ ] Rafael: en la hoja vieja (cuenta personal) **Encuesta → Cerrar encuesta** y dejarla como respaldo.
 - [ ] Prueba real con un correo de P26, anular, **Borrar filas de prueba**. RESPUESTAS vacía antes de difundir.
 
 ## Comandos
