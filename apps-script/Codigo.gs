@@ -100,7 +100,7 @@ function configuracionInicial() {
   const r = generarPadron_();
   CacheService.getScriptCache().remove('carreras_padron');
   crearResumen_();
-  onOpen();
+  try { onOpen(); } catch (e) {}   // desde el editor a veces no hay interfaz: el menú aparece al recargar la hoja (F5)
   bitacora_('Configuración inicial', r.texto);
   aviso_('Configuración lista', r.texto + '\n\nRevisa la pestaña CONFIG y los nombres en CARRERAS. Las celdas amarillas en CARRERAS son códigos nuevos sin nombre.');
 }
