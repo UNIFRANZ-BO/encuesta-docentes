@@ -58,14 +58,14 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 - Guía PDF del administrador: `entregables/Guia_hoja_encuesta_docentes.pdf` (generada con `python docs/tutorial/build_pdf.py`; `docs/tutorial/` y `entregables/` no van al repo).
 
 ## Estado y pendientes (22-oct-2026)
-- [x] v1.2 publicada (`?v=4`): pregunta 9 binaria + ping de calentamiento. Fila 1 de RESPUESTAS (Z1) y PAPELERA (AC1) ya actualizadas con el título nuevo de la 9.
-- [ ] **Rafael: pegar el script v1.2 y Administrar implementaciones → ✏️ → Nueva versión** (hasta entonces el servidor sigue en v1.1 y no guarda: el título de la 9 no coincide). Verificar con `ping` → `version_app:"1.2"`.
-- [ ] Rafael: **Actualizar padrón** (239) y **Reconstruir RESUMEN**.
+- [x] v1.2 publicada (`?v=4`) y **script v1.2 implementado** (ping `version_app:"1.2"`). Padrón actualizado: 239. Guardado verificado desde la página publicada (`PRUEBA-MVJXF70K`: 9 = «Aprendizaje», 5 = «Sí, lo conozco»).
+- [x] Rafael hizo una respuesta real de prueba (Vannia Villarroel) y la anuló (está en PAPELERA).
+- [ ] Rafael: **Reconstruir RESUMEN** (aún muestra la 9 vieja en promedios) y **Borrar filas de prueba** (quedan `PRUEBA-V12152025` —con «5» vacío y «Ingeniería» mal escrita porque la mandé con curl desde la consola de Windows, no es un error del sistema— y `PRUEBA-MVJXF70K`).
 - [ ] Rafael: cerrar la encuesta en la hoja vieja de la cuenta personal.
-- [ ] Prueba real con un correo de P26, anular, **Borrar filas de prueba** (hay `PRUEBA-MVJU3R7O`). RESPUESTAS vacía antes de difundir.
+- [ ] Opcional ofrecido: verificar el correo en segundo plano mientras el docente lo escribe (solo app).
 
 ## Velocidad (22-oct-2026)
-- Medido: `ping` ~2,5 s (costo fijo de Apps Script), `validar` 3,5–4,7 s; la primera llamada tras un rato sin uso es más lenta (arranque en frío).
+- Medido: `ping` ~2,5 s (costo fijo de Apps Script; 4–7 s el 22-oct por la tarde con la cuenta @unifranz), `validar` 3,5–4,9 s; la primera llamada tras un rato sin uso es más lenta (arranque en frío).
 - v1.2: la app hace un `ping` silencioso al abrir la bienvenida (el servidor ya está despierto cuando el docente escribe su correo) y `validar` ya no arma la lista de carreras (la app de docentes no la usa).
 - Con PADRON vacío, `validar` busca en vivo en P26 y agrega la fila a PADRON (más lento): por eso hay que correr **Actualizar padrón**.
 - Al cambiar un título de RESPUESTAS en el script hay que cambiar también la fila 1 de RESPUESTAS y de PAPELERA (columna +3), o `hojaResp_` deja de guardar. Lo hice con el conector de Sheets (Z1 y AC1).
