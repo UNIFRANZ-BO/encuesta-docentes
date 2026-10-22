@@ -35,7 +35,8 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
   - 5 «¿Conoces el Modelo Educativo UNIFRANZ?»: Sí, lo conozco / Requiero más información.
   - 6, 11 «¿Qué tan satisfecho estás con…?»: 1–5 Nada satisfecho … Totalmente satisfecho (carita).
   - 7 «…del diseño instruccional (DI)… competencias de la asignatura?» y 8 «…desafío educativo del Proyecto Integrador?»: **acuerdo** 1–5 (medidor). El Excel dice «satisfecho»; se mantiene acuerdo.
-  - 9, 12: 1–5 Nunca … Siempre (barras).
+  - 9 (v1.2, 22-oct, pedido de Rafael): «¿Sientes que tus evaluaciones se están enfocando en la calificación (notas) o en el aprendizaje que desarrollas?» → binaria **1. Notas / 2. Aprendizaje** (como la de estudiantes). Se guarda el texto; RESUMEN muestra su distribución (ya no está en promedios).
+  - 12: 1–5 Nunca … Siempre (barras).
   - 10 Retroalimentación: tipo `level` 1–5 (columna F, con el 3 completado): Nunca realizo retroalimentación · Al finalizar cada hito · Al finalizar las evaluaciones · Al finalizar actividades y evaluaciones · En todas mis clases. Tiene promedio en RESUMEN.
   - 13 «Cuando tienes dudas sobre las experiencias de aprendizaje, ¿a quién acudes?»: múltiple (4). 14: abierta opcional (1000).
   - RRDDTT 1: múltiple, 10 categorías, sin máximo. RRDDTT 2: múltiple, **solo muestra lo marcado en RRDDTT 1** + **«Ninguno»** excluyente (índice 99 en la app, `r02_ninguno:true` en el payload): salta RRDDTT 3 y 4 y las guarda como 1 «No los utilizo» y «No los he utilizado» (el script lo fuerza).
@@ -53,15 +54,21 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 
 ## Publicación
 - **URL del script:** implementación `AKfycbxnS5AIBBrpoV…q59Wg` (cuenta @unifranz, 22-oct-2026), incrustada en `API_URL_DEFECTO`.
-- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=3** (v=3: v1.1 + hoja @unifranz)
+- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=4** (v=4: v1.2, pregunta 9 Notas/Aprendizaje)
 - Guía PDF del administrador: `entregables/Guia_hoja_encuesta_docentes.pdf` (generada con `python docs/tutorial/build_pdf.py`; `docs/tutorial/` y `entregables/` no van al repo).
 
 ## Estado y pendientes (22-oct-2026)
-- [x] v1.1 (Excel nuevo + redacción + retroalimentación en escala + «Ninguno») publicada con la hoja @unifranz. Pruebas OK (hoja simulada inglés/español; recorridos 390, 390 «Ninguno», 1366).
-- [x] Hoja @unifranz: script v1.1, P26 con 239 docentes, CONFIG «Pestañas de origen» = P26. `validar` reconoce a los docentes (búsqueda en vivo en P26).
-- [ ] **Rafael: Encuesta → Actualizar padrón** (aún no ejecutado: PADRON vacío → RESUMEN sin habilitados ni cobertura). Debe decir 239.
-- [ ] Rafael: en la hoja vieja (cuenta personal) **Encuesta → Cerrar encuesta** y dejarla como respaldo.
-- [ ] Prueba real con un correo de P26, anular, **Borrar filas de prueba**. RESPUESTAS vacía antes de difundir.
+- [x] v1.2 publicada (`?v=4`): pregunta 9 binaria + ping de calentamiento. Fila 1 de RESPUESTAS (Z1) y PAPELERA (AC1) ya actualizadas con el título nuevo de la 9.
+- [ ] **Rafael: pegar el script v1.2 y Administrar implementaciones → ✏️ → Nueva versión** (hasta entonces el servidor sigue en v1.1 y no guarda: el título de la 9 no coincide). Verificar con `ping` → `version_app:"1.2"`.
+- [ ] Rafael: **Actualizar padrón** (239) y **Reconstruir RESUMEN**.
+- [ ] Rafael: cerrar la encuesta en la hoja vieja de la cuenta personal.
+- [ ] Prueba real con un correo de P26, anular, **Borrar filas de prueba** (hay `PRUEBA-MVJU3R7O`). RESPUESTAS vacía antes de difundir.
+
+## Velocidad (22-oct-2026)
+- Medido: `ping` ~2,5 s (costo fijo de Apps Script), `validar` 3,5–4,7 s; la primera llamada tras un rato sin uso es más lenta (arranque en frío).
+- v1.2: la app hace un `ping` silencioso al abrir la bienvenida (el servidor ya está despierto cuando el docente escribe su correo) y `validar` ya no arma la lista de carreras (la app de docentes no la usa).
+- Con PADRON vacío, `validar` busca en vivo en P26 y agrega la fila a PADRON (más lento): por eso hay que correr **Actualizar padrón**.
+- Al cambiar un título de RESPUESTAS en el script hay que cambiar también la fila 1 de RESPUESTAS y de PAPELERA (columna +3), o `hojaResp_` deja de guardar. Lo hice con el conector de Sheets (Z1 y AC1).
 
 ## Comandos
 ```bash

@@ -1,6 +1,6 @@
 /** @OnlyCurrentDoc */  // el script solo puede tocar esta hoja, ningún otro archivo de Drive
 /**
- * ENCUESTA DOCENTES · PLAN 2026 · II/2026  (v1.1)
+ * ENCUESTA DOCENTES · PLAN 2026 · II/2026  (v1.2)
  * Backend en Google Apps Script, ligado a la hoja que contiene la base de docentes (pestaña P26).
  *
  * ── PRIMERA VEZ ─────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@
  * origen, fechas, nombres de carreras, excluidos) se maneja desde la hoja, sin tocar código.
  */
 
-const VERSION_APP = '1.1';
+const VERSION_APP = '1.2';
 const ZONA = 'America/La_Paz';
 const H = {             // nombres de pestañas
   CONFIG: 'CONFIG', CARRERAS: 'CARRERAS', PADRON: 'PADRON', EXCLUIDOS: 'EXCLUIDOS',
@@ -32,6 +32,7 @@ const SEDES = { LPZ: 'La Paz', EAT: 'El Alto', CBB: 'Cochabamba', SCZ: 'Santa Cr
 const SEMS = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo'];
 const ROLES = ['Docente Tiempo Completo', 'Docente Tiempo Horario'];
 const MODELO = ['Sí, lo conozco', 'Requiero más información'];
+const EVAL = ['Notas', 'Aprendizaje'];
 const RETRO = ['Nunca realizo retroalimentación', 'Al finalizar cada hito', 'Al finalizar las evaluaciones', 'Al finalizar actividades y evaluaciones', 'En todas mis clases'];   // escala 1–5
 const ACUDE = ['Director de Carrera', 'Jefatura de Enseñanza Aprendizaje', 'Colegas docentes', 'Docentes Tiempo Completo'];
 const USO = ['No los utilizo', 'Menos de una vez al mes', 'Aproximadamente una vez al mes', 'Varias veces al mes', 'En todas o casi todas mis clases'];
@@ -346,7 +347,7 @@ function cabResp_() {
     '6. ¿Qué tan satisfecho estás con el desarrollo de las experiencias de aprendizaje en tus clases? (1 = Nada satisfecho · 5 = Totalmente satisfecho)',
     '7. ¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar las competencias de la asignatura? (1 = Nada de acuerdo · 5 = Totalmente de acuerdo)',
     '8. ¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar el desafío educativo del Proyecto Integrador? (1 = Nada de acuerdo · 5 = Totalmente de acuerdo)',
-    '9. ¿Con qué frecuencia tus evaluaciones se centran en la asignación de calificaciones? (1 = Nunca · 5 = Siempre)',
+    '9. ¿Sientes que tus evaluaciones se están enfocando en la calificación (notas) o en el aprendizaje que desarrollas?',
     '10. ¿Con qué frecuencia brindas retroalimentación en el desarrollo de tus clases? (' + leyenda_(RETRO) + ')',
     '11. ¿Qué tan satisfecho estás con el desarrollo de las codocencias? (1 = Nada satisfecho · 5 = Totalmente satisfecho)',
     '12. ¿Con qué frecuencia coordinas con el docente tutor? (1 = Nunca · 5 = Siempre)',
@@ -435,7 +436,7 @@ function validar_(correoIn) {
   if (ya) return { ok: true, habilitado: false, motivo: 'ya_respondio', fecha: fmtFecha_(ya.valores[0]) };
   const f = r.fila, nombres = nombresCarreras_();
   return {
-    ok: true, habilitado: true, carreras: listaCarrerasPadron_(),
+    ok: true, habilitado: true, carreras: [],
     docente: { nombre: f[2], sede: f[3], sede_nombre: f[4], carrera_cod: f[5], carrera: nombres[f[5]] || f[6], plan: f[8] }
   };
 }
@@ -480,7 +481,7 @@ function filaResp_(d, id, correo, P) {
     new Date(), id, correo, P[1], txt_(P[4], 40), txt_(P[3], 10), txt_(P[6], 80), txt_(P[5], 10), P[8]
   ].concat(multi(sems, SEMS)).concat([
     opc_(d.p04, ROLES), opc_(d.p05, MODELO),
-    esc_(d.p06), esc_(d.p07), esc_(d.p08), esc_(d.p09), esc_(d.p10), esc_(d.p11), esc_(d.p12)
+    esc_(d.p06), esc_(d.p07), esc_(d.p08), opc_(d.p09, EVAL), esc_(d.p10), esc_(d.p11), esc_(d.p12)
   ]).concat(multi(acude, ACUDE)).concat([
     txt_(d.p14, 1000)
   ]).concat(multi(r1, CAT_TEC)).concat(multi(r2, CAT_TEC, ning ? NINGUNO : '')).concat([
@@ -655,7 +656,7 @@ function crearResumen_() {
   sedes.forEach(s => { const r = rows.length + 1; push([SEDES[s], '=COUNTIF(' + P('D') + ',"' + s + '")', '=COUNTIFS(' + P('D') + ',"' + s + '",' + P('L') + ',"Respondió")', '=IFERROR(C' + r + '/B' + r + ',0)'], 'pct4'); });
   push(['']);
   const ESC = [['6.', 'Satisfacción con las experiencias de aprendizaje en sus clases'], ['7.', 'Actividades del DI pertinentes para la asignatura (acuerdo)'], ['8.', 'Actividades del DI pertinentes para el Proyecto Integrador (acuerdo)'],
-    ['9.', 'Evaluaciones centradas en la calificación (1 Nunca – 5 Siempre)'], ['10.', 'Frecuencia de la retroalimentación (1 Nunca – 5 En todas mis clases)'], ['11.', 'Satisfacción con las codocencias'], ['12.', 'Coordinación con el docente tutor (1 Nunca – 5 Siempre)'],
+    ['10.', 'Frecuencia de la retroalimentación (1 Nunca – 5 En todas mis clases)'], ['11.', 'Satisfacción con las codocencias'], ['12.', 'Coordinación con el docente tutor (1 Nunca – 5 Siempre)'],
     ['RRDDTT 3.', 'Frecuencia de uso de los recursos del DI (1 No los utilizo – 5 En todas o casi todas)'], ['RRDDTT 4.', 'Los recursos ayudan a la enseñanza y el aprendizaje (1 No me ayudan – 5 Me ayudan mucho)']];
   push(['PROMEDIOS (escala 1 a 5)', 'General'].concat(sedes.map(s => SEDES[s])), 'cab');
   ESC.forEach(q => {
@@ -683,6 +684,7 @@ function crearResumen_() {
   distMulti('3. SEMESTRES EN LOS QUE DA DOCENCIA (puede marcar varios)', '3', SEMS);
   dist('4. ROL DOCENTE', '4. ', ROLES);
   dist('5. ¿CONOCE EL MODELO EDUCATIVO UNIFRANZ?', '5. ', MODELO);
+  dist('9. ENFOQUE DE LAS EVALUACIONES', '9. ', EVAL);
   distNivel('10. FRECUENCIA DE LA RETROALIMENTACIÓN', '10. ', RETRO); push(['']);
   distMulti('13. A QUIÉN ACUDE CON DUDAS SOBRE LAS EXPERIENCIAS DE APRENDIZAJE (puede marcar varios)', '13', ACUDE);
   distMulti('RRDDTT 1. RECURSOS INCLUIDOS EN EL DISEÑO INSTRUCCIONAL', 'RRDDTT 1', CAT_TEC);

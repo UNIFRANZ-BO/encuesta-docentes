@@ -499,7 +499,7 @@ details.more ol li b{color:var(--txt)}
 // ⬇⬇⬇ Pega aquí la URL de tu implementación de Apps Script (termina en /exec) ⬇⬇⬇
 const API_URL_DEFECTO = 'https://script.google.com/macros/s/AKfycbxnS5AIBBrpoV-hNR5-31d9xOumo3DSah3Xj3dYzu7Ha3IqyL2tc-ujfXub9KXX4q59Wg/exec';
 // ⬆⬆⬆ ------------------------------------------------------------------------ ⬆⬆⬆
-const VERSION = '1.1';
+const VERSION = '1.2';
 const LS_DRAFT = 'encdoc_draft1', LS_COLA = 'encdoc_cola1';
 const LOGO_FULL = '__LOGO_FULL__';
 const LOGO_WORD = '__LOGO_WORD__';
@@ -586,7 +586,7 @@ const STEPS = [
   {k:'p06', kind:'scale', mod:1, src:'D', n:6, t:'¿Qué tan satisfecho estás con el desarrollo de las experiencias de aprendizaje en tus clases?', sc:SAT},
   {k:'p07', kind:'scale', mod:1, src:'D', n:7, t:'¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar las competencias de la asignatura?', sc:ACU},
   {k:'p08', kind:'scale', mod:1, src:'D', n:8, t:'¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar el desafío educativo del Proyecto Integrador?', sc:ACU},
-  {k:'p09', kind:'scale', mod:1, src:'D', n:9, t:'¿Con qué frecuencia tus evaluaciones se centran en la asignación de calificaciones?', sc:FRQ},
+  {k:'p09', kind:'binary', mod:1, src:'D', n:9, t:'¿Sientes que tus evaluaciones se están enfocando en la calificación (notas) o en el aprendizaje que desarrollas?', opts:['Notas','Aprendizaje'], icons:['notas','apr'], numbered:true},
   {k:'p10', kind:'level', mod:1, src:'D', n:10, t:'¿Con qué frecuencia brindas retroalimentación en el desarrollo de tus clases?', sc:RETRO},
   {k:'p11', kind:'scale', mod:1, src:'D', n:11, t:'¿Qué tan satisfecho estás con el desarrollo de las codocencias?', sc:SAT},
   {k:'p12', kind:'scale', mod:1, src:'D', n:12, t:'¿Con qué frecuencia coordinas con el docente tutor?', sc:FRQ},
@@ -1215,7 +1215,7 @@ $('#admin').addEventListener('click', async e => {
   if (a === 'ping') { admLog('Ping…'); try { const j = await jsonp({action:'ping'}); admLog(JSON.stringify(j)); } catch (er) { admLog('Sin respuesta: ' + er.message + '. Revisa que la implementación tenga acceso "Cualquier persona".'); } }
   if (a === 'prueba') {
     const p = {id:'PRUEBA-' + Date.now().toString(36).toUpperCase(), fecha_local:new Date().toLocaleString('es-BO'), correo:'prueba@unifranz.edu.bo', sede:'Cochabamba', sede_cod:'CBB', carrera:'Ingeniería Comercial', carrera_cod:'ICO', semestre:'', plan:2026, modalidad:'', datos_corregidos:false, sede_base:'CBB', carrera_base:'Ingeniería Comercial',
-      p03:['Primero', 'Segundo'], p03_idx:[1, 2], p04:'Docente Tiempo Horario', p05:'Sí, lo conozco', p06:5, p07:4, p08:4, p09:3, p10:4, p11:4, p12:3, p13:[ACUDE[0].n, ACUDE[2].n], p13_idx:[1, 3], p14:'Fila de prueba',
+      p03:['Primero', 'Segundo'], p03_idx:[1, 2], p04:'Docente Tiempo Horario', p05:'Sí, lo conozco', p06:5, p07:4, p08:4, p09:'Aprendizaje', p10:4, p11:4, p12:3, p13:[ACUDE[0].n, ACUDE[2].n], p13_idx:[1, 3], p14:'Fila de prueba',
       r01:[CAT_TEC[0].n, CAT_TEC[1].n, CAT_TEC[8].n], r01_idx:[1, 2, 9], r02:[CAT_TEC[1].n], r02_idx:[2], r02_ninguno:false, r03:4, r04:'NA', r05:'', dur_s:0, movil:false, version:VERSION};
     admLog('Escribiendo ' + p.id + '…'); try { const j = await enviar(p, admLog); admLog('OK ' + JSON.stringify(j)); } catch (er) { admLog('ERROR: ' + er.message); }
   }
@@ -1310,6 +1310,7 @@ const FX = (() => {
   $('#tickTrack').innerHTML = seq + seq;
   if (!API_OK) $('#bannerSlot').innerHTML = '<div class="banner"><div>Modo de prueba: la encuesta aún no está conectada a la base de datos. Cualquier correo @unifranz.edu.bo entra con datos ficticios y las respuestas se guardan solo en este equipo.</div></div>';
   showWelcome();
+  if (API_OK) jsonp({action:'ping'}, 20000).catch(() => {});   // calienta el servidor mientras el docente lee la bienvenida
   if (API_OK && cola().length) setTimeout(() => flushCola(), 2500);
   addEventListener('online', () => flushCola());
   if (QS.get('admin') === '1') setTimeout(openAdmin, 600);

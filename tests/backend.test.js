@@ -67,7 +67,7 @@ console.log('validar nada',J(get('validar',{correo:'x.y@unifranz.edu.bo'})));
 base.d.push(['NUEVO DOCENTE X','666','CBB','PSI','doc.nuevo.docente.x@unifranz.edu.bo',2026]);
 console.log('validar nuevo en base',J(get('validar',{correo:'doc.nuevo.docente.x@unifranz.edu.bo'})).slice(0,160),'padron rows',ss.getSheetByName('PADRON').getLastRow()-1, ss.getSheetByName('PADRON').formulas[(ss.getSheetByName('PADRON').getLastRow())+',12']);
 const pl={id:'DO-AAAAA-BBBBBB',correo:'doc.juancarlos.perez.lo@unifranz.edu.bo',sede:'Cochabamba',sede_cod:'CBB',carrera:'Trucho',carrera_cod:'ICO',datos_corregidos:true,
- p03_idx:[2,1,1,11],p04:'Docente Tiempo Completo',p05:'Requiero más información',p06:4,p07:5,p08:3,p09:2,p10:5,p11:5,p12:1,p13_idx:[1,4],p14:'=mal',
+ p03_idx:[2,1,1,11],p04:'Docente Tiempo Completo',p05:'Requiero más información',p06:4,p07:5,p08:3,p09:'Notas',p10:5,p11:5,p12:1,p13_idx:[1,4],p14:'=mal',
  r01_idx:[1,2,3,9],r02_idx:[2,9,5],r03:4,r04:'NA',r05:'Más simuladores',dur_s:90,movil:true,version:'1.0'};
 const post=d=>JSON.parse(ctx.doPost({postData:{contents:J({action:'guardar',data:d})}}).t);
 console.log('guardar',J(post(pl)));
@@ -79,7 +79,7 @@ H.forEach((h,i)=>console.log(i+1,h.slice(0,46),'=>',J(R.get(2,i+1)).slice(0,50))
 const fila=ctx.filaResp_(pl,'DO-X','x',null);
 if(fila.length!==H.length){console.error('FALLA: la fila tiene',fila.length,'celdas y la cabecera',H.length);process.exit(1)}
 const val=t=>R.get(2,H.findIndex(h=>h.indexOf(t)===0)+1);
-const esper={'1. Sede':'Cochabamba','2. Carrera':'Negocios y Gestión Empresarial','3. Selecciona':'Primero | Segundo','3.11':undefined,'4. ':'Docente Tiempo Completo','10. ':5,'5. ':'Requiero más información','13. ':'Director de Carrera | Docentes Tiempo Completo','14. ':"'=mal",'RRDDTT 2. ':'Plataformas de gestión y evaluación | Plataformas IA','RRDDTT 4.':'No los he utilizado','RRDDTT 2.5 ':0,'RRDDTT 2.9 ':1};
+const esper={'1. Sede':'Cochabamba','2. Carrera':'Negocios y Gestión Empresarial','3. Selecciona':'Primero | Segundo','3.11':undefined,'4. ':'Docente Tiempo Completo','10. ':5,'5. ':'Requiero más información','9. ':'Notas','13. ':'Director de Carrera | Docentes Tiempo Completo','14. ':"'=mal",'RRDDTT 2. ':'Plataformas de gestión y evaluación | Plataformas IA','RRDDTT 4.':'No los he utilizado','RRDDTT 2.5 ':0,'RRDDTT 2.9 ':1};
 Object.keys(esper).forEach(k=>{ if(esper[k]===undefined) return; if(val(k)!==esper[k]){console.error('FALLA:',k,'=>',J(val(k)),'esperado',J(esper[k]));process.exit(1)} });
 // «Ninguno» en RRDDTT 2: texto «Ninguno», columnas 0 y RRDDTT 3/4 forzadas aunque el cliente mande otra cosa
 const fN=ctx.filaResp_({...pl,r02_ninguno:true,r02_idx:[2],r03:5,r04:3},'DO-N','x',null), at=t=>fN[H.findIndex(h=>h.indexOf(t)===0)];

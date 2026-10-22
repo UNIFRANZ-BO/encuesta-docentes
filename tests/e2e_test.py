@@ -46,7 +46,7 @@ async def main():
         assert 'No encontramos' in await pg.inner_text('#mailMsg')
         await pg.fill('#mailIn', 'DOC.JuanPerez.Lopez.ga@unifranz.edu.bo '); await pg.click('#btnVerify'); await pg.wait_for_timeout(2600)
         assert await pg.evaluate("STEPS[S.i].k") == 'm2'
-        ANS = {'p06': 4, 'p07': 5, 'p08': 4, 'p09': 2, 'p11': 3, 'p12': 4}
+        ANS = {'p06': 4, 'p07': 5, 'p08': 4, 'p11': 3, 'p12': 4}
         for _ in range(40):
             k = await pg.evaluate("STEPS[S.i].k")
             if k == 'review': break
@@ -54,6 +54,7 @@ async def main():
                 for i in [0, 1]: await pg.click(f'.opt[data-i="{i}"]')
             elif k == 'p04': await pg.click('.opt[data-v="Docente Tiempo Horario"]')
             elif k == 'p05': await pg.click('.opt[data-v="Requiero más información"]')
+            elif k == 'p09': await pg.click('.opt[data-v="Aprendizaje"]')
             elif k == 'p10':
                 assert await pg.locator('.opt').count() == 5 and (await pg.inner_text('.opt >> nth=0')).find('Nunca realizo') >= 0, 'p10: 5 niveles'
                 await pg.click('.opt[data-n="5"]')
@@ -100,7 +101,7 @@ async def main():
         d = list(DB.values())[0]
         print(json.dumps(d, ensure_ascii=False))
         esper = {'p03_idx': [1, 2], 'p04': 'Docente Tiempo Horario', 'p05': 'Requiero más información', 'p10': 5, 'p13_idx': [1, 3],
-                 'r01_idx': [2, 3], 'r02_idx': [2], 'r04': 'NA', 'p06': 4, 'p12': 4, 'r03': 4, 'id': d['id'][:3] == 'DO-' and d['id']}
+                 'r01_idx': [2, 3], 'r02_idx': [2], 'r04': 'NA', 'p06': 4, 'p09': 'Aprendizaje', 'p12': 4, 'r03': 4, 'id': d['id'][:3] == 'DO-' and d['id']}
         if NING: esper.update({'r02': ['Ninguno'], 'r02_idx': [], 'r02_ninguno': True, 'r03': 1, 'r04': 'NA', 'r01_idx': [2, 3, 9]})
         for k, v in esper.items(): assert d[k] == v, (k, d[k], v)
         assert not errs, errs
