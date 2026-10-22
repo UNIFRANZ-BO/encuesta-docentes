@@ -1,6 +1,6 @@
 /** @OnlyCurrentDoc */  // el script solo puede tocar esta hoja, ningún otro archivo de Drive
 /**
- * ENCUESTA DOCENTES · PLAN 2026 · II/2026  (v1.0)
+ * ENCUESTA DOCENTES · PLAN 2026 · II/2026  (v1.1)
  * Backend en Google Apps Script, ligado a la hoja que contiene la base de docentes (pestaña P26).
  *
  * ── PRIMERA VEZ ─────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@
  * origen, fechas, nombres de carreras, excluidos) se maneja desde la hoja, sin tocar código.
  */
 
-const VERSION_APP = '1.0';
+const VERSION_APP = '1.1';
 const ZONA = 'America/La_Paz';
 const H = {             // nombres de pestañas
   CONFIG: 'CONFIG', CARRERAS: 'CARRERAS', PADRON: 'PADRON', EXCLUIDOS: 'EXCLUIDOS',
@@ -31,11 +31,12 @@ const SEDES = { LPZ: 'La Paz', EAT: 'El Alto', CBB: 'Cochabamba', SCZ: 'Santa Cr
 // Opciones del instrumento (textuales). Deben coincidir con las de la app.
 const SEMS = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo'];
 const ROLES = ['Docente Tiempo Completo', 'Docente Tiempo Horario'];
-const MODELO = ['Sí conozco', 'Requiero más información'];
-const RETRO = ['Al finalizar el hito', 'Al finalizar evaluaciones', 'Al finalizar Actividades y evaluaciones', 'En todas mis clases'];
+const MODELO = ['Sí, lo conozco', 'Requiero más información'];
+const RETRO = ['Nunca realizo retroalimentación', 'Al finalizar cada hito', 'Al finalizar las evaluaciones', 'Al finalizar actividades y evaluaciones', 'En todas mis clases'];   // escala 1–5
 const ACUDE = ['Director de Carrera', 'Jefatura de Enseñanza Aprendizaje', 'Colegas docentes', 'Docentes Tiempo Completo'];
-const USO = ['No los utilizo', 'Menos de una vez al mes', 'Aproximadamente una vez al mes', 'Varias veces al mes', 'En todas o casi todas las clases'];
-const MEDIDA = ['Nada', 'Poco', 'Moderadamente', 'Bastante', 'Mucho'];
+const USO = ['No los utilizo', 'Menos de una vez al mes', 'Aproximadamente una vez al mes', 'Varias veces al mes', 'En todas o casi todas mis clases'];
+const MEDIDA = ['No me ayudan', 'Me ayudan poco', 'Me ayudan moderadamente', 'Me ayudan bastante', 'Me ayudan mucho'];
+const NINGUNO = 'Ninguno';   // RRDDTT 2: el docente no usa ninguno de los recursos
 const NO_USA = 'No los he utilizado';
 const CAT_TEC = [
   'Herramientas de creación y diseño', 'Plataformas de gestión y evaluación', 'Recursos audiovisuales y multimedia',
@@ -338,27 +339,27 @@ const leyenda_ = labels => labels.map((t, i) => (i + 1) + ' = ' + t).join(' · '
 function cabResp_() {
   return [
     'Marca temporal', 'ID respuesta', 'Correo', 'Nombre completo', '1. Sede', 'Cód. sede', '2. Carrera', 'Cód. carrera', 'Plan',
-    '3. Selecciona los semestres que está dando docencia'
+    '3. Selecciona los semestres en los que estás dando docencia'
   ].concat(cols01_('3', SEMS)).concat([
-    '4. Rol docente',
+    '4. ¿Cuál es tu rol docente?',
     '5. ¿Conoces el Modelo Educativo UNIFRANZ?',
-    '6. ¿Te sientes satisfecho con el desarrollo de las experiencias de aprendizaje en tus clases? (1 = Nada satisfecho · 5 = Totalmente satisfecho)',
-    '7. ¿Las actividades experienciales del DI son pertinentes para desarrollar las competencias previstas en la asignatura? (1 = Nada de acuerdo · 5 = Totalmente de acuerdo)',
-    '8. ¿Las actividades experienciales del DI son pertinentes para desarrollar las competencias previstas para el Proyecto Integrador? (1 = Nada de acuerdo · 5 = Totalmente de acuerdo)',
+    '6. ¿Qué tan satisfecho estás con el desarrollo de las experiencias de aprendizaje en tus clases? (1 = Nada satisfecho · 5 = Totalmente satisfecho)',
+    '7. ¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar las competencias de la asignatura? (1 = Nada de acuerdo · 5 = Totalmente de acuerdo)',
+    '8. ¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar el desafío educativo del Proyecto Integrador? (1 = Nada de acuerdo · 5 = Totalmente de acuerdo)',
     '9. ¿Con qué frecuencia tus evaluaciones se centran en la asignación de calificaciones? (1 = Nunca · 5 = Siempre)',
-    '10. ¿Con qué frecuencia brindas retroalimentación en el desarrollo de tus clases?',
-    '11. ¿Estás satisfecho con el desarrollo de las codocencias? (1 = Nada satisfecho · 5 = Totalmente satisfecho)',
+    '10. ¿Con qué frecuencia brindas retroalimentación en el desarrollo de tus clases? (' + leyenda_(RETRO) + ')',
+    '11. ¿Qué tan satisfecho estás con el desarrollo de las codocencias? (1 = Nada satisfecho · 5 = Totalmente satisfecho)',
     '12. ¿Con qué frecuencia coordinas con el docente tutor? (1 = Nunca · 5 = Siempre)',
-    '13. ¿Cúando tienes dudas sobre la Experiencias de Aprendizaje a quién acudes?'
+    '13. Cuando tienes dudas sobre las experiencias de aprendizaje, ¿a quién acudes?'
   ]).concat(cols01_('13', ACUDE)).concat([
     '14. Observaciones o sugerencias',
     'RRDDTT 1. ¿Qué recursos didácticos y digitales están incluidos en el diseño instruccional de tus asignaturas?'
   ]).concat(cols01_('RRDDTT 1', CAT_TEC)).concat([
-    'RRDDTT 2. De los recursos incluidos en el diseño instruccional, ¿cuáles utilizas efectivamente en tus clases?'
+    'RRDDTT 2. De los recursos incluidos en el diseño instruccional, ¿cuáles utilizas efectivamente en tus clases? («' + NINGUNO + '» si no usa ninguno)'
   ]).concat(cols01_('RRDDTT 2', CAT_TEC)).concat([
     'RRDDTT 3. ¿Con qué frecuencia utilizas los recursos didácticos y digitales incluidos en el diseño instruccional? (' + leyenda_(USO) + ')',
     'RRDDTT 4. ¿En qué medida los recursos que utilizas te ayudan a desarrollar las actividades de enseñanza y aprendizaje previstas en el diseño instruccional? (' + leyenda_(MEDIDA) + ' · o «' + NO_USA + '»)',
-    'RRDDTT 5. Tienes sugerencias de algún recursos tecnológicos/didácticos y/o Comentarios',
+    'RRDDTT 5. ¿Tienes sugerencias de recursos tecnológicos o didácticos, o algún comentario?',
     'Duración (segundos)', 'Dispositivo', 'Fecha y hora local (dispositivo)', 'Periodo', 'Versión app', 'Datos completos (JSON)'
   ]);
 }
@@ -472,17 +473,18 @@ function guardar_(d) {
 function filaResp_(d, id, correo, P) {
   P = P || [correo, 'PRUEBA', '', d.sede_cod, d.sede, d.carrera_cod, d.carrera, '', d.plan, ''];
   const sems = idx_(d.p03_idx, SEMS), acude = idx_(d.p13_idx, ACUDE), r1 = idx_(d.r01_idx, CAT_TEC);
-  const r2 = idx_(d.r02_idx, CAT_TEC).filter(n => r1.indexOf(n) >= 0);
-  const multi = (idx, ops) => [idx.map(n => ops[n - 1]).join(' | ')].concat(ops.map((_, i) => idx.indexOf(i + 1) >= 0 ? 1 : 0));
+  const ning = d.r02_ninguno === true;   // «Ninguno»: RRDDTT 3 y 4 quedan como «No los utilizo» y «No los he utilizado»
+  const r2 = ning ? [] : idx_(d.r02_idx, CAT_TEC).filter(n => r1.indexOf(n) >= 0);
+  const multi = (idx, ops, vacio) => [idx.length ? idx.map(n => ops[n - 1]).join(' | ') : (vacio || '')].concat(ops.map((_, i) => idx.indexOf(i + 1) >= 0 ? 1 : 0));
   return [
     new Date(), id, correo, P[1], txt_(P[4], 40), txt_(P[3], 10), txt_(P[6], 80), txt_(P[5], 10), P[8]
   ].concat(multi(sems, SEMS)).concat([
     opc_(d.p04, ROLES), opc_(d.p05, MODELO),
-    esc_(d.p06), esc_(d.p07), esc_(d.p08), esc_(d.p09), opc_(d.p10, RETRO), esc_(d.p11), esc_(d.p12)
+    esc_(d.p06), esc_(d.p07), esc_(d.p08), esc_(d.p09), esc_(d.p10), esc_(d.p11), esc_(d.p12)
   ]).concat(multi(acude, ACUDE)).concat([
     txt_(d.p14, 1000)
-  ]).concat(multi(r1, CAT_TEC)).concat(multi(r2, CAT_TEC)).concat([
-    esc_(d.r03), d.r04 === 'NA' ? NO_USA : esc_(d.r04), txt_(d.r05, 500),
+  ]).concat(multi(r1, CAT_TEC)).concat(multi(r2, CAT_TEC, ning ? NINGUNO : '')).concat([
+    ning ? 1 : esc_(d.r03), ning || d.r04 === 'NA' ? NO_USA : esc_(d.r04), txt_(d.r05, 500),
     Number(d.dur_s) || '', d.movil ? 'Móvil' : 'Computadora', txt_(d.fecha_local, 40), config_().periodo, txt_(d.version, 10),
     JSON.stringify(d).slice(0, 45000)
   ]);
@@ -653,8 +655,8 @@ function crearResumen_() {
   sedes.forEach(s => { const r = rows.length + 1; push([SEDES[s], '=COUNTIF(' + P('D') + ',"' + s + '")', '=COUNTIFS(' + P('D') + ',"' + s + '",' + P('L') + ',"Respondió")', '=IFERROR(C' + r + '/B' + r + ',0)'], 'pct4'); });
   push(['']);
   const ESC = [['6.', 'Satisfacción con las experiencias de aprendizaje en sus clases'], ['7.', 'Actividades del DI pertinentes para la asignatura (acuerdo)'], ['8.', 'Actividades del DI pertinentes para el Proyecto Integrador (acuerdo)'],
-    ['9.', 'Evaluaciones centradas en la calificación (1 Nunca – 5 Siempre)'], ['11.', 'Satisfacción con las codocencias'], ['12.', 'Coordinación con el docente tutor (1 Nunca – 5 Siempre)'],
-    ['RRDDTT 3.', 'Frecuencia de uso de los recursos del DI (1 No los utilizo – 5 En todas o casi todas)'], ['RRDDTT 4.', 'Los recursos ayudan a la enseñanza y el aprendizaje (1 Nada – 5 Mucho)']];
+    ['9.', 'Evaluaciones centradas en la calificación (1 Nunca – 5 Siempre)'], ['10.', 'Frecuencia de la retroalimentación (1 Nunca – 5 En todas mis clases)'], ['11.', 'Satisfacción con las codocencias'], ['12.', 'Coordinación con el docente tutor (1 Nunca – 5 Siempre)'],
+    ['RRDDTT 3.', 'Frecuencia de uso de los recursos del DI (1 No los utilizo – 5 En todas o casi todas)'], ['RRDDTT 4.', 'Los recursos ayudan a la enseñanza y el aprendizaje (1 No me ayudan – 5 Me ayudan mucho)']];
   push(['PROMEDIOS (escala 1 a 5)', 'General'].concat(sedes.map(s => SEDES[s])), 'cab');
   ESC.forEach(q => {
     const c = R(col(q[0] + ' '));
@@ -667,6 +669,11 @@ function crearResumen_() {
     ops.forEach(o => { push([o, '=COUNTIFS(' + c + ',"' + o + '",' + ID + ',' + real + ')', '=IFERROR(B' + (rows.length + 1) + '/$B$4,0)'], 'pct'); });
     push(['']);
   };
+  // escala con una etiqueta por valor: cuántos eligieron cada nivel (1–5)
+  const distNivel = (tit, ct, ops) => {
+    push([tit, 'N', '%'], 'cab');
+    ops.forEach((o, i) => { push([(i + 1) + ' · ' + o, '=COUNTIFS(' + R(col(ct)) + ',' + (i + 1) + ',' + ID + ',' + real + ')', '=IFERROR(B' + (rows.length + 1) + '/$B$4,0)'], 'pct'); });
+  };
   // opción múltiple: suma de las columnas 0/1 («pre.1 », «pre.2 »…)
   const distMulti = (tit, pre, ops) => {
     push([tit, 'N', '% de docentes'], 'cab');
@@ -676,15 +683,16 @@ function crearResumen_() {
   distMulti('3. SEMESTRES EN LOS QUE DA DOCENCIA (puede marcar varios)', '3', SEMS);
   dist('4. ROL DOCENTE', '4. ', ROLES);
   dist('5. ¿CONOCE EL MODELO EDUCATIVO UNIFRANZ?', '5. ', MODELO);
-  dist('10. FRECUENCIA DE LA RETROALIMENTACIÓN', '10. ', RETRO);
+  distNivel('10. FRECUENCIA DE LA RETROALIMENTACIÓN', '10. ', RETRO); push(['']);
   distMulti('13. A QUIÉN ACUDE CON DUDAS SOBRE LAS EXPERIENCIAS DE APRENDIZAJE (puede marcar varios)', '13', ACUDE);
   distMulti('RRDDTT 1. RECURSOS INCLUIDOS EN EL DISEÑO INSTRUCCIONAL', 'RRDDTT 1', CAT_TEC);
   distMulti('RRDDTT 2. RECURSOS QUE UTILIZA EFECTIVAMENTE EN CLASE', 'RRDDTT 2', CAT_TEC);
-  push(['RRDDTT 3. FRECUENCIA DE USO DE LOS RECURSOS DEL DI', 'N', '%'], 'cab');
-  USO.forEach((o, i) => { push([(i + 1) + ' · ' + o, '=COUNTIFS(' + R(col('RRDDTT 3.')) + ',' + (i + 1) + ',' + ID + ',' + real + ')', '=IFERROR(B' + (rows.length + 1) + '/$B$4,0)'], 'pct'); });
+  rows.pop();   // quita la fila en blanco: la fila «Ninguno» va pegada a la tabla anterior
+  push([NINGUNO + ' (no usa ninguno)', '=COUNTIFS(' + R(col('RRDDTT 2. ')) + ',"' + NINGUNO + '",' + ID + ',' + real + ')', '=IFERROR(B' + (rows.length + 1) + '/$B$4,0)'], 'pct');
   push(['']);
-  push(['RRDDTT 4. LOS RECURSOS AYUDAN A LA ENSEÑANZA Y EL APRENDIZAJE', 'N', '%'], 'cab');
-  MEDIDA.forEach((o, i) => { push([(i + 1) + ' · ' + o, '=COUNTIFS(' + R(col('RRDDTT 4.')) + ',' + (i + 1) + ',' + ID + ',' + real + ')', '=IFERROR(B' + (rows.length + 1) + '/$B$4,0)'], 'pct'); });
+  distNivel('RRDDTT 3. FRECUENCIA DE USO DE LOS RECURSOS DEL DI', 'RRDDTT 3.', USO);
+  push(['']);
+  distNivel('RRDDTT 4. LOS RECURSOS AYUDAN A LA ENSEÑANZA Y EL APRENDIZAJE', 'RRDDTT 4.', MEDIDA);
   push([NO_USA, '=COUNTIFS(' + R(col('RRDDTT 4.')) + ',"' + NO_USA + '",' + ID + ',' + real + ')', '=IFERROR(B' + (rows.length + 1) + '/$B$4,0)'], 'pct');
   push(['']);
   push(['POR CARRERA', 'Habilitados', 'Respondieron', 'Cobertura', 'Prom. 6', 'Prom. 11', 'Prom. RRDDTT 4'], 'cab');

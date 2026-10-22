@@ -279,8 +279,8 @@ button{font:inherit;color:inherit}
 .opt .lvm{flex:none;display:flex;align-items:flex-end;gap:3px;width:27px;height:21px}
 .opt .lvm i{width:4.5px;border-radius:2px;background:rgba(255,255,255,.14);transition:all .3s}
 .opt .lvm i.on{background:var(--lc);box-shadow:0 0 6px var(--lc)}
-.opt.lv.na{border-style:dashed}
-.opt.lv.na.sel{border-style:solid}
+.opt.lv.na,.opt.sq.none{border-style:dashed}
+.opt.lv.na.sel,.opt.sq.none.sel{border-style:solid}
 .duo .opt.info.sel{box-shadow:0 0 0 1.5px var(--y) inset,0 0 34px -6px rgba(255,210,61,.6)}
 .opts.full .opt:not(.sel){opacity:.42;filter:saturate(.4)}
 .opts.full .opt:not(.sel):hover{opacity:.6}
@@ -499,7 +499,7 @@ details.more ol li b{color:var(--txt)}
 // ⬇⬇⬇ Pega aquí la URL de tu implementación de Apps Script (termina en /exec) ⬇⬇⬇
 const API_URL_DEFECTO = 'https://script.google.com/macros/s/AKfycbxu8VQnHKLXAwR-MPD1KM2_lI8t-zh6I3VKeU-fXfPhxbcYVr-z7CJ3zseNIqljtl53/exec';
 // ⬆⬆⬆ ------------------------------------------------------------------------ ⬆⬆⬆
-const VERSION = '1.0';
+const VERSION = '1.1';
 const LS_DRAFT = 'encdoc_draft1', LS_COLA = 'encdoc_cola1';
 const LOGO_FULL = '__LOGO_FULL__';
 const LOGO_WORD = '__LOGO_WORD__';
@@ -534,7 +534,6 @@ const CARRERAS_DEMO = [
 ].map(([cod, nombre]) => ({cod, nombre}));
 const SEMS = ['Primero','Segundo','Tercero','Cuarto','Quinto','Sexto','Séptimo','Octavo','Noveno','Décimo'].map(n => ({n}));
 const ACUDE = ['Director de Carrera','Jefatura de Enseñanza Aprendizaje','Colegas docentes','Docentes Tiempo Completo'].map(n => ({n}));
-const RETRO = ['Al finalizar el hito','Al finalizar evaluaciones','Al finalizar Actividades y evaluaciones','En todas mis clases'];
 const CAT_TEC = [
   {n:'Herramientas de creación y diseño', e:'Canva, Genially, PowerPoint, Prezi, Adobe XD, Figma, SketchUp, Herramienta CAD, Paginas web de creación de activos visuales y modelos.'},
   {n:'Plataformas de gestión y evaluación', e:'Moodle, Kahoot, Quizizz, Google Forms, Mentimeter, Rubistar, SocioAnalytics, Google Slides, Trello, Miro, Confluence, Google Analytics.'},
@@ -562,9 +561,13 @@ const FRQ = {lo:'Nunca', hi:'Siempre', viz:'bars'};
 // Preguntas «de nivel»: una lista de opciones con texto (sin números). `labels[v-1]` es el texto del valor v
 // (1 = mínimo, 5 = máximo, que es lo que se guarda); `order` es el orden en que se muestran, el del instrumento.
 // `na` = opción aparte que no cuenta en el promedio.
-const USO = {labels:['No los utilizo','Menos de una vez al mes','Aproximadamente una vez al mes','Varias veces al mes','En todas o casi todas las clases'], order:[5,4,3,2,1]};
-const MED = {labels:['Nada','Poco','Moderadamente','Bastante','Mucho'], order:[1,2,3,4,5], na:'No los he utilizado'};
+const RETRO = {labels:['Nunca realizo retroalimentación','Al finalizar cada hito','Al finalizar las evaluaciones','Al finalizar actividades y evaluaciones','En todas mis clases'], order:[1,2,3,4,5]};
+const USO = {labels:['No los utilizo','Menos de una vez al mes','Aproximadamente una vez al mes','Varias veces al mes','En todas o casi todas mis clases'], order:[5,4,3,2,1]};
+const MED = {labels:['No me ayudan','Me ayudan poco','Me ayudan moderadamente','Me ayudan bastante','Me ayudan mucho'], order:[1,2,3,4,5], na:'No los he utilizado'};
 const NA = 'NA';
+// «Ninguno» en RRDDTT 2: opción excluyente (índice fuera del catálogo). Si se marca, RRDDTT 3 y 4 se saltan y
+// quedan como «No los utilizo» (1) y «No los he utilizado».
+const NINGUNO = 99;
 const VCOL = ['#ff3d6e','#ff7a2e','#ffd23d','#39ffb0','#00e5ff'];
 
 const MODS = [
@@ -577,24 +580,24 @@ const MODS = [
 const STEPS = [
   {k:'correo', kind:'login', mod:0},
   {k:'m2', kind:'intro', mod:1},
-  {k:'p03', kind:'multi', mod:1, src:'D', n:3, t:'Selecciona los semestres que está dando docencia', hint:'Marca todos los que correspondan.', opts:SEMS, cols:2},
-  {k:'p04', kind:'choice', mod:1, src:'D', n:4, t:'Rol docente', opts:['Docente Tiempo Completo','Docente Tiempo Horario']},
-  {k:'p05', kind:'binary', mod:1, src:'D', n:5, t:'¿Conoces el Modelo Educativo UNIFRANZ?', opts:['Sí conozco','Requiero más información'], icons:['si','info']},
-  {k:'p06', kind:'scale', mod:1, src:'D', n:6, t:'¿Te sientes satisfecho con el desarrollo de las experiencias de aprendizaje en tus clases?', sc:SAT},
-  {k:'p07', kind:'scale', mod:1, src:'D', n:7, t:'¿Las actividades experienciales del DI son pertinentes para desarrollar las competencias previstas en la asignatura?', sc:ACU},
-  {k:'p08', kind:'scale', mod:1, src:'D', n:8, t:'¿Las actividades experienciales del DI son pertinentes para desarrollar las competencias previstas para el Proyecto Integrador?', sc:ACU},
+  {k:'p03', kind:'multi', mod:1, src:'D', n:3, t:'Selecciona los semestres en los que estás dando docencia', hint:'Marca todos los que correspondan.', opts:SEMS, cols:2},
+  {k:'p04', kind:'choice', mod:1, src:'D', n:4, t:'¿Cuál es tu rol docente?', opts:['Docente Tiempo Completo','Docente Tiempo Horario']},
+  {k:'p05', kind:'binary', mod:1, src:'D', n:5, t:'¿Conoces el Modelo Educativo UNIFRANZ?', opts:['Sí, lo conozco','Requiero más información'], icons:['si','info']},
+  {k:'p06', kind:'scale', mod:1, src:'D', n:6, t:'¿Qué tan satisfecho estás con el desarrollo de las experiencias de aprendizaje en tus clases?', sc:SAT},
+  {k:'p07', kind:'scale', mod:1, src:'D', n:7, t:'¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar las competencias de la asignatura?', sc:ACU},
+  {k:'p08', kind:'scale', mod:1, src:'D', n:8, t:'¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar el desafío educativo del Proyecto Integrador?', sc:ACU},
   {k:'p09', kind:'scale', mod:1, src:'D', n:9, t:'¿Con qué frecuencia tus evaluaciones se centran en la asignación de calificaciones?', sc:FRQ},
-  {k:'p10', kind:'choice', mod:1, src:'D', n:10, t:'¿Con qué frecuencia brindas retroalimentación en el desarrollo de tus clases?', opts:RETRO},
-  {k:'p11', kind:'scale', mod:1, src:'D', n:11, t:'¿Estás satisfecho con el desarrollo de las codocencias?', sc:SAT},
+  {k:'p10', kind:'level', mod:1, src:'D', n:10, t:'¿Con qué frecuencia brindas retroalimentación en el desarrollo de tus clases?', sc:RETRO},
+  {k:'p11', kind:'scale', mod:1, src:'D', n:11, t:'¿Qué tan satisfecho estás con el desarrollo de las codocencias?', sc:SAT},
   {k:'p12', kind:'scale', mod:1, src:'D', n:12, t:'¿Con qué frecuencia coordinas con el docente tutor?', sc:FRQ},
-  {k:'p13', kind:'multi', mod:1, src:'D', n:13, t:'¿Cúando tienes dudas sobre la Experiencias de Aprendizaje a quién acudes?', hint:'Puedes marcar más de una opción.', opts:ACUDE},
+  {k:'p13', kind:'multi', mod:1, src:'D', n:13, t:'Cuando tienes dudas sobre las experiencias de aprendizaje, ¿a quién acudes?', hint:'Puedes marcar más de una opción.', opts:ACUDE},
   {k:'p14', kind:'open', mod:1, src:'D', n:14, t:'Observaciones o sugerencias', opt:true, max:1000, ph:'Escribe aquí lo que quieras compartir…'},
   {k:'m3', kind:'intro', mod:2},
   {k:'r01', kind:'multi', mod:2, src:'R', n:1, t:'¿Qué recursos didácticos y digitales están incluidos en el diseño instruccional de tus asignaturas?', hint:'Marca todos los que correspondan.', opts:CAT_TEC},
-  {k:'r02', kind:'multi', mod:2, src:'R', n:2, t:'De los recursos incluidos en el diseño instruccional, ¿cuáles utilizas efectivamente en tus clases?', hint:'Aparecen solo los que marcaste en la pregunta anterior.', opts:CAT_TEC, from:'r01'},
-  {k:'r03', kind:'level', mod:2, src:'R', n:3, t:'¿Con qué frecuencia utilizas los recursos didácticos y digitales incluidos en el diseño instruccional?', sc:USO},
-  {k:'r04', kind:'level', mod:2, src:'R', n:4, t:'¿En qué medida los recursos que utilizas te ayudan a desarrollar las actividades de enseñanza y aprendizaje previstas en el diseño instruccional?', sc:MED},
-  {k:'r05', kind:'open', mod:2, src:'R', n:5, t:'Tienes sugerencias de algún recursos tecnológicos/didácticos y/o Comentarios', opt:true, max:500, short:true, ph:'Escribe aquí tu sugerencia o comentario…'},
+  {k:'r02', kind:'multi', mod:2, src:'R', n:2, t:'De los recursos incluidos en el diseño instruccional, ¿cuáles utilizas efectivamente en tus clases?', hint:'Aparecen solo los que marcaste en la pregunta anterior. Si no usas ninguno, marca «Ninguno».', opts:CAT_TEC, from:'r01', none:'Ninguno'},
+  {k:'r03', kind:'level', mod:2, src:'R', n:3, t:'¿Con qué frecuencia utilizas los recursos didácticos y digitales incluidos en el diseño instruccional?', sc:USO, skip:() => usaNinguno()},
+  {k:'r04', kind:'level', mod:2, src:'R', n:4, t:'¿En qué medida los recursos que utilizas te ayudan a desarrollar las actividades de enseñanza y aprendizaje previstas en el diseño instruccional?', sc:MED, skip:() => usaNinguno()},
+  {k:'r05', kind:'open', mod:2, src:'R', n:5, t:'¿Tienes sugerencias de recursos tecnológicos o didácticos, o algún comentario?', opt:true, max:500, short:true, ph:'Escribe aquí tu sugerencia o comentario…'},
   {k:'review', kind:'review', mod:2}
 ];
 const QSTEPS = STEPS.filter(s => s.src);
@@ -620,15 +623,23 @@ function answered(st) {
 // Índices visibles de una pregunta múltiple; con `from`, solo los marcados en esa otra pregunta.
 function multiOpts(st) {
   const all = st.opts.map((_, i) => i);
-  return st.from ? all.filter(i => (S.a[st.from] || []).includes(i)) : all;
+  return (st.from ? all.filter(i => (S.a[st.from] || []).includes(i)) : all).concat(st.none ? [NINGUNO] : []);
 }
+const optName = (st, i) => i === NINGUNO ? st.none : st.opts[i].n;
+const usaNinguno = () => (S.a.r02 || []).includes(NINGUNO);
+// «Ninguno» completa solas RRDDTT 3 y 4; si después se desmarca, se borran para que el docente las responda.
+function aplicarNinguno() {
+  if (usaNinguno()) { S.a.r03 = 1; S.a.r04 = NA; S.a._auto = 1; }
+  else if (S.a._auto) { delete S.a.r03; delete S.a.r04; delete S.a._auto; }
+}
+const salta = i => STEPS[i] && STEPS[i].skip && STEPS[i].skip();
 // Quita de las preguntas que dependen de `k` las opciones que ya no están marcadas en `k`.
 function podar(k) {
   STEPS.filter(s => s.from === k && Array.isArray(S.a[s.k])).forEach(s => { const ok = multiOpts(s); S.a[s.k] = S.a[s.k].filter(i => ok.includes(i)); });
 }
 function fmtAns(st) {
   const v = S.a[st.k];
-  if (st.kind === 'multi') return (v || []).map(i => st.opts[i].n).join(' · ');
+  if (st.kind === 'multi') return (v || []).map(i => optName(st, i)).join(' · ');
   if (st.kind === 'level') return v === NA ? st.sc.na : v ? st.sc.labels[v - 1] : '';
   if (st.kind === 'scale') return v ? v + ' / 5' + (v == 1 ? ' — ' + st.sc.lo : v == 5 ? ' — ' + st.sc.hi : '') : '';
   return v || '';
@@ -665,9 +676,10 @@ function next() {
     return;
   }
   if (S.toReview && st.kind !== 'review') { S.toReview = false; return go(STEPS.length - 1); }
-  if (S.i < STEPS.length - 1) go(S.i + 1);
+  let j = S.i + 1; while (salta(j)) j++;
+  if (j < STEPS.length) go(j);
 }
-function prev() { if (S.i > 0) go(S.i - 1, true); else showWelcome(true); }
+function prev() { let j = S.i - 1; while (j > 0 && salta(j)) j--; if (j >= 0) go(j, true); else showWelcome(true); }
 let autoT = null;
 function autoNext(ms = 650) { clearTimeout(autoT); autoT = setTimeout(next, ms); }
 
@@ -744,9 +756,9 @@ function render(el, st) {
   } else if (st.kind === 'level') {
     body = levelHtml(st, v);
   } else if (st.kind === 'multi') {
-    const vis = multiOpts(st), arr = (v || []).filter(i => vis.includes(i)), mx = st.max || vis.length;
+    const vis = multiOpts(st), arr = (v || []).filter(i => vis.includes(i)), mx = st.max || vis.filter(i => i !== NINGUNO).length;
     body = `<div class="mcount"><b id="mc">${arr.length}</b> de ${mx} seleccionadas <span class="dots">${Array.from({length:mx}, (_, i) => `<i class="${i < arr.length ? 'on' : ''}"></i>`).join('')}</span></div>
-    <div class="opts ${st.cols === 2 ? 'two' : ''} ${st.max && arr.length >= mx ? 'full' : ''}" id="mopts">${vis.map((i, j) => { const o = st.opts[i]; return `<button class="opt sq ${arr.includes(i) ? 'sel' : ''}" data-i="${i}" aria-pressed="${arr.includes(i)}" ${optDelay(j)} ${j === 0 ? 'data-autofocus' : ''}><span class="key">${i + 1}</span><span class="lbl">${esc(o.n)}${o.e ? `<span class="sub">${esc(o.e)}</span>` : ''}</span><span class="chk">${IC.check}</span></button>`; }).join('')}</div>`;
+    <div class="opts ${st.cols === 2 ? 'two' : ''} ${st.max && arr.length >= mx ? 'full' : ''}" id="mopts">${vis.map((i, j) => { const o = i === NINGUNO ? {n:st.none} : st.opts[i]; return `<button class="opt sq ${i === NINGUNO ? 'none' : ''} ${arr.includes(i) ? 'sel' : ''}" data-i="${i}" aria-pressed="${arr.includes(i)}" ${optDelay(j)} ${j === 0 ? 'data-autofocus' : ''}><span class="key">${i === NINGUNO ? '0' : i + 1}</span><span class="lbl">${esc(o.n)}${o.e ? `<span class="sub">${esc(o.e)}</span>` : ''}</span><span class="chk">${IC.check}</span></button>`; }).join('')}</div>`;
   } else if (st.kind === 'open') {
     body = `<div class="tx"><textarea id="txIn" class="${st.short ? 'short' : ''}" maxlength="${st.max}" placeholder="${esc(st.ph)}" data-autofocus>${esc(v || '')}</textarea><span class="cnt"><span id="txC">${(v || '').length}</span> / ${st.max}</span></div>`;
   }
@@ -885,7 +897,7 @@ function bind(el, st) {
     });
   }
   if (st.kind === 'multi') {
-    const vis = multiOpts(st), mx = st.max || vis.length;
+    const vis = multiOpts(st), mx = st.max || vis.filter(i => i !== NINGUNO).length;
     el.addEventListener('click', e => {
       const b = e.target.closest('.opt'); if (!b) return;
       const i = +b.dataset.i; let arr = (S.a[st.k] || []).filter(x => vis.includes(x));
@@ -894,13 +906,15 @@ function bind(el, st) {
         const mc = $('.mcount', el); mc.classList.remove('flash'); void mc.offsetWidth; mc.classList.add('flash');
         return toast(`Máximo ${mx}. Quita una para elegir otra.`);
       }
-      arr = arr.includes(i) ? arr.filter(x => x !== i) : [...arr, i].sort((x, y) => x - y);
-      S.a[st.k] = arr; b.classList.toggle('sel', arr.includes(i)); b.setAttribute('aria-pressed', arr.includes(i));
+      if (i === NINGUNO) arr = arr.includes(i) ? [] : [i];   // «Ninguno» es excluyente
+      else arr = arr.includes(i) ? arr.filter(x => x !== i) : [...arr.filter(x => x !== NINGUNO), i].sort((x, y) => x - y);
+      S.a[st.k] = arr;
+      $$('.opt', el).forEach(x => { const on = arr.includes(+x.dataset.i); x.classList.toggle('sel', on); x.setAttribute('aria-pressed', on); });
       if (arr.includes(i)) { ripple(b, e); FX.burst(e.clientX, e.clientY, 10); }
       $('#mc', el).textContent = arr.length;
       $$('.dots i', el).forEach((d, k) => d.classList.toggle('on', k < arr.length));
       $('#mopts', el).classList.toggle('full', !!st.max && arr.length >= mx);
-      podar(st.k); saveDraft(); refreshNext(st);
+      podar(st.k); if (st.k === 'r02' || st.k === 'r01') aplicarNinguno(); saveDraft(); refreshNext(st);
     });
   }
   if (st.kind === 'scale') {
@@ -1000,7 +1014,7 @@ function renderReview(el) {
   QSTEPS.forEach((q, i) => {
     if (q.mod !== lastMod) { lastMod = q.mod; html += `<div class="rvsec">${MODS[q.mod].l} · ${esc(MODS[q.mod].t)}</div>`; }
     const a = fmtAns(q);
-    html += `<div class="rvi" style="animation-delay:${i * 35}ms"><span class="n">${q.src}${q.nlbl ? '01' : pad(q.n)}</span><span class="q">${esc(q.t)}<span class="a ${a ? '' : 'empty'}">${a ? esc(a) : (q.opt ? 'Sin respuesta (opcional)' : 'Falta responder')}</span></span><button data-edit="${STEPS.indexOf(q)}">Editar</button></div>`;
+    html += `<div class="rvi" style="animation-delay:${i * 35}ms"><span class="n">${q.src}${q.nlbl ? '01' : pad(q.n)}</span><span class="q">${esc(q.t)}<span class="a ${a ? '' : 'empty'}">${a ? esc(a) : (q.opt ? 'Sin respuesta (opcional)' : 'Falta responder')}</span></span>${salta(STEPS.indexOf(q)) ? '' : `<button data-edit="${STEPS.indexOf(q)}">Editar</button>`}</div>`;
   });
   const faltan = QSTEPS.filter(q => !answered(q));
   el.innerHTML = `<div class="card"><div class="notch"></div>
@@ -1021,7 +1035,7 @@ function renderReview(el) {
 
 /* ---------- envío ---------- */
 function buildPayload() {
-  const A = S.a, r02 = (A.r02 || []).filter(i => (A.r01 || []).includes(i));
+  const A = S.a, ning = (A.r02 || []).includes(NINGUNO), r02 = ning ? [] : (A.r02 || []).filter(i => (A.r01 || []).includes(i));
   return {
     id: S.id, fecha_local: new Date().toLocaleString('es-BO', {hour12:false}),
     correo: A.correo, sede: A.sede, sede_cod: A.sede_cod, carrera: A.carrera, carrera_cod: A.carrera_cod,
@@ -1033,8 +1047,8 @@ function buildPayload() {
     p13: (A.p13 || []).map(i => ACUDE[i].n), p13_idx: (A.p13 || []).map(i => i + 1),
     p14: (A.p14 || '').trim(),
     r01: (A.r01 || []).map(i => CAT_TEC[i].n), r01_idx: (A.r01 || []).map(i => i + 1),
-    r02: r02.map(i => CAT_TEC[i].n), r02_idx: r02.map(i => i + 1),
-    r03: A.r03, r04: A.r04 === NA ? 'NA' : A.r04, r05: (A.r05 || '').trim(),
+    r02: ning ? ['Ninguno'] : r02.map(i => CAT_TEC[i].n), r02_idx: r02.map(i => i + 1), r02_ninguno: ning,
+    r03: ning ? 1 : A.r03, r04: ning || A.r04 === NA ? 'NA' : A.r04, r05: (A.r05 || '').trim(),
     dur_s: S.t0 ? Math.round((Date.now() - S.t0) / 1000) : '',
     movil: matchMedia('(pointer:coarse)').matches, version: VERSION
   };
@@ -1201,8 +1215,8 @@ $('#admin').addEventListener('click', async e => {
   if (a === 'ping') { admLog('Ping…'); try { const j = await jsonp({action:'ping'}); admLog(JSON.stringify(j)); } catch (er) { admLog('Sin respuesta: ' + er.message + '. Revisa que la implementación tenga acceso "Cualquier persona".'); } }
   if (a === 'prueba') {
     const p = {id:'PRUEBA-' + Date.now().toString(36).toUpperCase(), fecha_local:new Date().toLocaleString('es-BO'), correo:'prueba@unifranz.edu.bo', sede:'Cochabamba', sede_cod:'CBB', carrera:'Ingeniería Comercial', carrera_cod:'ICO', semestre:'', plan:2026, modalidad:'', datos_corregidos:false, sede_base:'CBB', carrera_base:'Ingeniería Comercial',
-      p03:['Primero', 'Segundo'], p03_idx:[1, 2], p04:'Docente Tiempo Horario', p05:'Sí conozco', p06:5, p07:4, p08:4, p09:3, p10:RETRO[3], p11:4, p12:3, p13:[ACUDE[0].n, ACUDE[2].n], p13_idx:[1, 3], p14:'Fila de prueba',
-      r01:[CAT_TEC[0].n, CAT_TEC[1].n, CAT_TEC[8].n], r01_idx:[1, 2, 9], r02:[CAT_TEC[1].n], r02_idx:[2], r03:4, r04:'NA', r05:'', dur_s:0, movil:false, version:VERSION};
+      p03:['Primero', 'Segundo'], p03_idx:[1, 2], p04:'Docente Tiempo Horario', p05:'Sí, lo conozco', p06:5, p07:4, p08:4, p09:3, p10:4, p11:4, p12:3, p13:[ACUDE[0].n, ACUDE[2].n], p13_idx:[1, 3], p14:'Fila de prueba',
+      r01:[CAT_TEC[0].n, CAT_TEC[1].n, CAT_TEC[8].n], r01_idx:[1, 2, 9], r02:[CAT_TEC[1].n], r02_idx:[2], r02_ninguno:false, r03:4, r04:'NA', r05:'', dur_s:0, movil:false, version:VERSION};
     admLog('Escribiendo ' + p.id + '…'); try { const j = await enviar(p, admLog); admLog('OK ' + JSON.stringify(j)); } catch (er) { admLog('ERROR: ' + er.message); }
   }
   if (a === 'flush') { admLog('Reenviando ' + cola().length + '…'); const n = await flushCola(admLog); admLog('Enviadas: ' + n); $('#admCola').textContent = cola().length; }

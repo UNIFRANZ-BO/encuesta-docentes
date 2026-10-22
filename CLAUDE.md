@@ -18,7 +18,7 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 | `apps-script/Codigo.gs` | Backend (web app + menú «Encuesta»). |
 | `tests/backend.test.js` | Hoja simulada con una pestaña tipo P26. Falla si la fila no coincide con la cabecera. |
 | `tests/e2e_test.py` | Recorrido completo (Playwright). `python tests/e2e_test.py 390` y `… 1366`. |
-| `docs/tutorial/` | Guía PDF del administrador **todavía con textos de la encuesta de estudiantes** (pendiente adaptar). No va al repo. |
+| `docs/tutorial/` | Fuente de la guía PDF del administrador (`build_pdf.py`). No va al repo. |
 
 ## Decisiones
 - **Población:** docentes del **plan 2026**, con su correo docente `@unifranz.edu.bo` (formato `doc.nombre.apellido.xx@…`).
@@ -27,45 +27,45 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 - Preguntas 1 (Sede) y 2 (Carrera) **no se muestran**: salen de P26 (si un docente dicta en varias carreras, cuenta la de P26).
 - Payload de perfil: `validar` devuelve `docente:{nombre, sede, sede_nombre, carrera_cod, carrera, plan}` (antes `estudiante`). IDs `DO-…`.
 - Claves locales: `encdoc_draft1`, `encdoc_cola1` (distintas de la encuesta de estudiantes).
-- Opciones y redacción **textuales** del instrumento (`para preguntas docentes.xlsx`, en el Escritorio de Rafael), incluso «Cúando», «que está dando docencia», «Al finalizar Actividades y evaluaciones». Rafael autorizó pasar a escala Likert donde corresponda:
-  - 3 Semestres: múltiple, Primero…Décimo (sin máximo).
-  - 4 Rol docente: Docente Tiempo Completo / Docente Tiempo Horario.
-  - 5 Modelo Educativo: Sí conozco / Requiero más información.
-  - 6, 11: 1–5 Nada satisfecho … Totalmente satisfecho (carita).
-  - 7, 8 («son pertinentes»): pasaron a **acuerdo** 1–5 Nada de acuerdo … Totalmente de acuerdo (medidor). El Excel decía «satisfecho».
+- **v1.1 (22-oct-2026):** Rafael pasó `preguntas.xlsx` (Escritorio; columna F = sugerencias, «respetar la base de preguntas y respuestas, se pueden optimizar las respuestas») y aprobó además mis mejoras de redacción. Textos vigentes:
+  - 3 «Selecciona los semestres en los que estás dando docencia»: múltiple, Primero…Décimo (sin máximo).
+  - 4 «¿Cuál es tu rol docente?»: Docente Tiempo Completo / Docente Tiempo Horario.
+  - 5 «¿Conoces el Modelo Educativo UNIFRANZ?»: Sí, lo conozco / Requiero más información.
+  - 6, 11 «¿Qué tan satisfecho estás con…?»: 1–5 Nada satisfecho … Totalmente satisfecho (carita).
+  - 7 «…del diseño instruccional (DI)… competencias de la asignatura?» y 8 «…desafío educativo del Proyecto Integrador?»: **acuerdo** 1–5 (medidor). El Excel dice «satisfecho»; se mantiene acuerdo.
   - 9, 12: 1–5 Nunca … Siempre (barras).
-  - 10 Retroalimentación: el Excel decía «escala 1 a 5» pero da 4 momentos → **opción única** con esos 4 textos.
-  - 13 A quién acudes: múltiple (4 opciones). 14: abierta opcional (1000).
-  - RRDDTT 1: múltiple, 10 categorías, sin máximo. RRDDTT 2: múltiple, **solo muestra lo marcado en RRDDTT 1** (si se desmarca algo en 1, se quita de 2).
-  - RRDDTT 3 y 4: tipo **`level`** (08-oct-2026, a pedido de Rafael: la escala con círculos 1–5 más la lista de textos resultaba ambigua). Una sola lista de opciones con letra y un medidor de rayas, **sin números**, en el orden del instrumento. Se sigue guardando 1–5 (1 = mínimo).
-    - RRDDTT 3: En todas o casi todas las clases (5) … No los utilizo (1).
-    - RRDDTT 4: Nada (1) … Mucho (5) + «No los he utilizado» (se guarda como texto y no cuenta en el promedio).
-  - RRDDTT 5: abierta opcional (500).
+  - 10 Retroalimentación: tipo `level` 1–5 (columna F, con el 3 completado): Nunca realizo retroalimentación · Al finalizar cada hito · Al finalizar las evaluaciones · Al finalizar actividades y evaluaciones · En todas mis clases. Tiene promedio en RESUMEN.
+  - 13 «Cuando tienes dudas sobre las experiencias de aprendizaje, ¿a quién acudes?»: múltiple (4). 14: abierta opcional (1000).
+  - RRDDTT 1: múltiple, 10 categorías, sin máximo. RRDDTT 2: múltiple, **solo muestra lo marcado en RRDDTT 1** + **«Ninguno»** excluyente (índice 99 en la app, `r02_ninguno:true` en el payload): salta RRDDTT 3 y 4 y las guarda como 1 «No los utilizo» y «No los he utilizado» (el script lo fuerza).
+  - RRDDTT 3 y 4: tipo **`level`** (lista con letra y medidor de rayas, **sin números**; se guarda 1–5).
+    - RRDDTT 3: En todas o casi todas mis clases (5) … No los utilizo (1).
+    - RRDDTT 4: No me ayudan (1) · Me ayudan poco · moderadamente · bastante · Me ayudan mucho (5) + «No los he utilizado» (texto, fuera del promedio).
+  - RRDDTT 5 «¿Tienes sugerencias de recursos tecnológicos o didácticos, o algún comentario?»: abierta opcional (500).
 - RESPUESTAS: múltiples = columna de texto «A | B» + una columna 0/1 por opción (`3.1 …`, `13.1 …`, `RRDDTT 1.1 …`, `RRDDTT 2.1 …`). RESUMEN suma esas columnas.
 
 ## Contrato app ↔ script
 - `GET ?action=ping` → `{ok, servicio:'encuesta-docentes-plan2026', version_app, abierta, periodo, respuestas}`
 - `GET ?action=validar&correo=` → `{ok, habilitado:true, docente:{…}, carreras}` o `{ok, habilitado:false, motivo, fecha?, mensaje?}`
 - `GET ?action=verificar&id=` → `{ok, existe}`
-- `POST {action:'guardar', data:{id, correo, …, p03, p03_idx, p04, p05, p06…p12, p13, p13_idx, p14, r01, r01_idx, r02, r02_idx, r03, r04 (1–5 o 'NA'), r05, dur_s, movil, fecha_local, version}}`. El script usa los `_idx` y valida los textos contra sus catálogos; sede/carrera/plan salen del padrón.
+- `POST {action:'guardar', data:{id, correo, …, p03, p03_idx, p04, p05, p06…p12 (p10 = 1–5), p13, p13_idx, p14, r01, r01_idx, r02, r02_idx, r02_ninguno, r03, r04 (1–5 o 'NA'), r05, dur_s, movil, fecha_local, version}}`. El script usa los `_idx` y valida los textos contra sus catálogos; sede/carrera/plan salen del padrón.
 
 ## Publicación
 - **URL del script:** implementación `AKfycbxu8VQnHKLX…tl53` (08-oct-2026), incrustada en `API_URL_DEFECTO`.
 - **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=2** (v=2 desde el cambio de RRDDTT 3 y 4)
 - Guía PDF del administrador: `entregables/Guia_hoja_encuesta_docentes.pdf` (generada con `python docs/tutorial/build_pdf.py`; `docs/tutorial/` y `entregables/` no van al repo).
 
-## Estado y pendientes (08-oct-2026)
-- [x] App v1.0 y script v1.0; pruebas locales OK (390 px, 1366 px, hoja simulada en inglés y español).
-- [x] Script instalado en la hoja: `configuracionInicial` → **239 docentes** habilitados (LPZ 79, EAT 67, CBB 55, SCZ 38), sin códigos de carrera nuevos.
-- [x] Publicado en Pages; ping desde la app publicada OK; fila `PRUEBA-MUZZ97LQ` escrita y verificada en RESPUESTAS (columnas correctas, RESUMEN la excluye).
-- [x] Guía PDF adaptada (23 páginas).
-- [ ] Rafael: respuesta real con un correo de P26, revisar RESPUESTAS/PADRON/RESUMEN, anular, **Borrar filas de prueba**. RESPUESTAS debe quedar vacía antes de difundir.
-- [ ] Pendiente de decisión: ¿opción «Ninguno» en RRDDTT 2?
+## Estado y pendientes (22-oct-2026)
+- [x] v1.0 publicada (08-oct) con la hoja de la cuenta personal: 239 docentes, 0 respuestas reales.
+- [x] **v1.1 lista en local** (app + script, pruebas OK: hoja simulada en inglés/español, recorridos 390 normal, 390 «Ninguno» y 1366). **No publicada**: la app v1.1 contra el script v1.0 dejaría en blanco p05, p10 y «Ninguno».
+- [ ] **Mudanza a la cuenta @unifranz** (`rafael.aramayo@unifranz.edu.bo`): Rafael pega `entregables/Codigo_Encuesta_Docentes.txt` (v1.1) en la hoja de la base de docentes de esa cuenta, `configuracionInicial`, revisa CONFIG (Pestañas de origen = P26), Nueva implementación → pasa la URL.
+- [ ] Con la URL: incrustarla, `git push` (publica) y repartir **`?v=3`**; ping + fila de prueba; actualizar el enlace y la URL en la guía PDF.
+- [ ] Después: en la hoja vieja (cuenta personal) **Encuesta → Cerrar encuesta** y dejarla como respaldo.
+- [ ] Prueba real con un correo de P26, anular, **Borrar filas de prueba**. RESPUESTAS vacía antes de difundir.
 
 ## Comandos
 ```bash
 export PATH="/c/Program Files/nodejs:$PATH"; export PYTHONIOENCODING=utf-8
 python build.py
 node tests/backend.test.js && SEP=";" node tests/backend.test.js
-python tests/e2e_test.py 390 && python tests/e2e_test.py 1366
+python tests/e2e_test.py 390 && python tests/e2e_test.py 390 ninguno && python tests/e2e_test.py 1366
 ```
