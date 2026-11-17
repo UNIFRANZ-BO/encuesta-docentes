@@ -499,7 +499,7 @@ details.more ol li b{color:var(--txt)}
 // ⬇⬇⬇ Pega aquí la URL de tu implementación de Apps Script (termina en /exec) ⬇⬇⬇
 const API_URL_DEFECTO = 'https://script.google.com/macros/s/AKfycbxnS5AIBBrpoV-hNR5-31d9xOumo3DSah3Xj3dYzu7Ha3IqyL2tc-ujfXub9KXX4q59Wg/exec';
 // ⬆⬆⬆ ------------------------------------------------------------------------ ⬆⬆⬆
-const VERSION = '1.2';
+const VERSION = '1.3';
 const LS_DRAFT = 'encdoc_draft1', LS_COLA = 'encdoc_cola1';
 const LOGO_FULL = '__LOGO_FULL__';
 const LOGO_WORD = '__LOGO_WORD__';
@@ -798,7 +798,8 @@ async function verify(el) {
   if (!MAIL_RE.test(correo)) return bad('Escribe tu correo institucional completo. Debe terminar en <b>@unifranz.edu.bo</b>.');
   verifying = true; card.classList.add('busy'); btn.querySelector('span').textContent = 'Verificando…'; msg.innerHTML = '<span class="info">Buscando tu registro…</span>';
   let r;
-  try { r = await validarCorreo(correo); } catch (e) { r = {ok:false, motivo:'red'}; }
+  const reintento = n => { msg.innerHTML = `<span class="info">La conexión está lenta. Reintentando (${n} de 3)…</span>`; };
+  try { r = await validarCorreo(correo, reintento); } catch (e) { r = {ok:false, motivo:'red'}; }
   verifying = false; card.classList.remove('busy'); btn.querySelector('span').textContent = 'Verificar';
   if (r && r.ok && r.habilitado && r.docente) {
     const E = r.docente;
@@ -815,18 +816,18 @@ async function verify(el) {
     no_habilitado:'Tu correo está registrado, pero esta encuesta no está habilitada para tu plan de estudios, sede o carrera.',
     ya_respondio:'Este correo ya respondió la encuesta' + (r && r.fecha ? ' el ' + esc(r.fecha) : '') + '. ¡Gracias por participar!',
     cerrada:(r && r.mensaje) ? esc(r.mensaje) : 'La encuesta no está disponible en este momento.',
-    red:'No pudimos conectar con el servidor. Revisa tu conexión a internet e inténtalo de nuevo.'
+    red:'No pudimos conectar con el servidor. Prueba esto: <b>1)</b> abre el enlace en Chrome o Safari (no dentro de WhatsApp, Instagram o Facebook); <b>2)</b> cambia a datos móviles u otra red Wi-Fi; <b>3)</b> vuelve a intentarlo en un minuto.'
   };
   bad(M[r && r.motivo] || M.no_encontrado);
 }
-async function validarCorreo(correo) {
+async function validarCorreo(correo, onRetry) {
   if (!API_OK) {   // modo de prueba: acepta cualquier correo @unifranz con datos ficticios
     await sleep(1100);
     const pre = correo.slice(0, 3).toUpperCase(), sede = SEDE_N[pre] ? pre : 'CBB';
     return {ok:true, habilitado:true, demo:true, carreras:CARRERAS_DEMO,
       docente:{nombre:(correo.split('.')[1] || 'Docente').split('@')[0], sede, sede_nombre:SEDE_N[sede], carrera_cod:'NGE', carrera:'Negocios y Gestión Empresarial', semestre:'', plan:2026, modalidad:''}};
   }
-  return jsonp({action:'validar', correo}, 20000);
+  return consultar({action:'validar', correo}, onRetry);
 }
 
 /* escala con visual dinámico */
@@ -1052,6 +1053,22 @@ function buildPayload() {
     dur_s: S.t0 ? Math.round((Date.now() - S.t0) / 1000) : '',
     movil: matchMedia('(pointer:coarse)').matches, version: VERSION
   };
+}
+// Consulta al servidor con hasta 3 intentos. En cada uno prueba JSONP y, si falla, fetch: algunas redes,
+// navegadores dentro de apps (WhatsApp, Instagram) o bloqueadores frenan el <script> pero no fetch.
+async function consultar(params, onRetry) {
+  let ultimo = new Error('sin-respuesta');
+  for (let k = 0; k < 3; k++) {
+    if (k) { if (onRetry) onRetry(k + 1); await sleep(1500 * k); }
+    try { const j = await jsonp(params, k ? 30000 : 20000); if (j) return j; } catch (e) { ultimo = e; }
+    try {
+      const u = new URL(API_URL);
+      Object.entries(params).forEach(([a, b]) => u.searchParams.set(a, b)); u.searchParams.set('_', Date.now());
+      const r = await fetchTO(u.toString(), {redirect:'follow'}, 30000);
+      const j = await r.json(); if (j) return j;
+    } catch (e) { ultimo = e; }
+  }
+  throw ultimo;
 }
 function fetchTO(url, opt, ms) {
   const ac = new AbortController(), t = setTimeout(() => ac.abort(), ms);

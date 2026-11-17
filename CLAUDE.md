@@ -54,7 +54,7 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 
 ## Publicación
 - **URL del script:** implementación `AKfycbxnS5AIBBrpoV…q59Wg` (cuenta @unifranz, 22-oct-2026), incrustada en `API_URL_DEFECTO`.
-- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=4** (v=4: v1.2, pregunta 9 Notas/Aprendizaje)
+- **Repo:** `UNIFRANZ-BO/encuesta-docentes` (público, Pages en `main`, raíz) → enlace vigente **https://unifranz-bo.github.io/encuesta-docentes/?v=5** (v=4: v1.2, pregunta 9 Notas/Aprendizaje)
 - Guía PDF del administrador: `entregables/Guia_hoja_encuesta_docentes.pdf` (generada con `python docs/tutorial/build_pdf.py`; `docs/tutorial/` y `entregables/` no van al repo).
 
 ## Estado y pendientes (22-oct-2026)
@@ -63,6 +63,9 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 - [ ] Rafael: **Reconstruir RESUMEN** (aún muestra la 9 vieja en promedios) y **Borrar filas de prueba** (quedan `PRUEBA-V12152025` —con «5» vacío y «Ingeniería» mal escrita porque la mandé con curl desde la consola de Windows, no es un error del sistema— y `PRUEBA-MVJXF70K`).
 - [ ] Rafael: cerrar la encuesta en la hoja vieja de la cuenta personal.
 - [ ] Opcional ofrecido: verificar el correo en segundo plano mientras el docente lo escribe (solo app).
+
+## Conexión (17-nov-2026)
+- **17-nov-2026 (v1.3):** algunos usuarios veían «No pudimos conectar con el servidor». Servidor verificado sano (50 ingresos simultáneos en ≤6 s). Causa: red o navegador del usuario (Wi-Fi con filtros, navegador dentro de WhatsApp/Instagram, bloqueadores). `validar` ahora usa `consultar()`: hasta 3 intentos, cada uno JSONP y si falla `fetch` (probado con el JSONP bloqueado contra el servidor real: entra igual), mensaje «Reintentando (n de 3)» y, si todo falla, instrucciones (abrir en Chrome/Safari, cambiar de red). Enlace vigente `?v=5`.
 
 ## Velocidad (22-oct-2026)
 - Medido: `ping` ~2,5 s (costo fijo de Apps Script; 4–7 s el 22-oct por la tarde con la cuenta @unifranz), `validar` 3,5–4,9 s; la primera llamada tras un rato sin uso es más lenta (arranque en frío).
