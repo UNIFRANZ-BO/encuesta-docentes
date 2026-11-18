@@ -499,7 +499,7 @@ details.more ol li b{color:var(--txt)}
 // ⬇⬇⬇ Pega aquí la URL de tu implementación de Apps Script (termina en /exec) ⬇⬇⬇
 const API_URL_DEFECTO = 'https://script.google.com/macros/s/AKfycbxnS5AIBBrpoV-hNR5-31d9xOumo3DSah3Xj3dYzu7Ha3IqyL2tc-ujfXub9KXX4q59Wg/exec';
 // ⬆⬆⬆ ------------------------------------------------------------------------ ⬆⬆⬆
-const VERSION = '1.3';
+const VERSION = '1.4';
 const LS_DRAFT = 'encdoc_draft1', LS_COLA = 'encdoc_cola1';
 const LOGO_FULL = '__LOGO_FULL__';
 const LOGO_WORD = '__LOGO_WORD__';
@@ -581,7 +581,7 @@ const STEPS = [
   {k:'correo', kind:'login', mod:0},
   {k:'m2', kind:'intro', mod:1},
   {k:'p03', kind:'multi', mod:1, src:'D', n:3, t:'Selecciona los semestres en los que estás dando docencia', hint:'Marca todos los que correspondan.', opts:SEMS, cols:2},
-  {k:'p04', kind:'choice', mod:1, src:'D', n:4, t:'¿Cuál es tu rol docente?', opts:['Docente Tiempo Completo','Docente Tiempo Horario']},
+  {k:'p04', kind:'choice', mod:1, src:'D', n:4, t:'¿Cuál es tu rol docente?', opts:['Docente Tiempo Completo','Docente Tiempo Horario','Director de carrera']},
   {k:'p05', kind:'binary', mod:1, src:'D', n:5, t:'¿Conoces el Modelo Educativo UNIFRANZ?', opts:['Sí, lo conozco','Requiero más información'], icons:['si','info']},
   {k:'p06', kind:'scale', mod:1, src:'D', n:6, t:'¿Qué tan satisfecho estás con el desarrollo de las experiencias de aprendizaje en tus clases?', sc:SAT},
   {k:'p07', kind:'scale', mod:1, src:'D', n:7, t:'¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar las competencias de la asignatura?', sc:ACU},

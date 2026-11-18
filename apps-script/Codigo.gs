@@ -1,6 +1,6 @@
 /** @OnlyCurrentDoc */  // el script solo puede tocar esta hoja, ningún otro archivo de Drive
 /**
- * ENCUESTA DOCENTES · PLAN 2026 · II/2026  (v1.2)
+ * ENCUESTA DOCENTES · PLAN 2026 · II/2026  (v1.4)
  * Backend en Google Apps Script, ligado a la hoja que contiene la base de docentes (pestaña P26).
  *
  * ── PRIMERA VEZ ─────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@
  * origen, fechas, nombres de carreras, excluidos) se maneja desde la hoja, sin tocar código.
  */
 
-const VERSION_APP = '1.2';
+const VERSION_APP = '1.4';
 const ZONA = 'America/La_Paz';
 const H = {             // nombres de pestañas
   CONFIG: 'CONFIG', CARRERAS: 'CARRERAS', PADRON: 'PADRON', EXCLUIDOS: 'EXCLUIDOS',
@@ -30,7 +30,7 @@ const H = {             // nombres de pestañas
 const SEDES = { LPZ: 'La Paz', EAT: 'El Alto', CBB: 'Cochabamba', SCZ: 'Santa Cruz' };
 // Opciones del instrumento (textuales). Deben coincidir con las de la app.
 const SEMS = ['Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo'];
-const ROLES = ['Docente Tiempo Completo', 'Docente Tiempo Horario'];
+const ROLES = ['Docente Tiempo Completo', 'Docente Tiempo Horario', 'Director de carrera'];
 const MODELO = ['Sí, lo conozco', 'Requiero más información'];
 const EVAL = ['Notas', 'Aprendizaje'];
 const RETRO = ['Nunca realizo retroalimentación', 'Al finalizar cada hito', 'Al finalizar las evaluaciones', 'Al finalizar actividades y evaluaciones', 'En todas mis clases'];   // escala 1–5
