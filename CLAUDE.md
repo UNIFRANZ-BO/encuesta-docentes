@@ -67,7 +67,7 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 ## Enlace de directores (18-nov-2026, v1.4)
 - Rafael pidió el rol «Director de carrera», pero **sin cambiar el enlace que ya tenían los docentes**. Solución: mismo formulario y misma hoja; con `?rol=director` la pregunta 4 muestra 3 roles (Docente Tiempo Completo · Docente Tiempo Horario · Director de carrera); sin el parámetro, los 2 de siempre.
 - Enlace de directores: **https://unifranz-bo.github.io/encuesta-docentes/?v=6&rol=director**. Enlace de docentes: el mismo de antes (`?v=4`/`?v=5`).
-- Script **v1.4**: `ROLES` incluye «Director de carrera» (si no, `opc_` lo guardaría en blanco). Rafael debe pegarlo + Nueva versión + Reconstruir RESUMEN **antes** de repartir el enlace de directores. Verificar con ping → `version_app:"1.4"`.
+- Script **v1.4** implementado por Rafael el 18-nov (ping `version_app:"1.4"`, misma URL, 115 respuestas intactas). Verificado: `PRUEBA-DIRMWMAILKP` se guardó con «Director de carrera» (borrarla con «Borrar filas de prueba").
 - Los directores deben estar en P26 o en AGREGADOS; un correo que ya respondió como docente no puede responder otra vez.
 
 ## Conexión (17-nov-2026)
