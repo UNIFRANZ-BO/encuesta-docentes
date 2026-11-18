@@ -11,6 +11,7 @@ SHOTS = RAIZ / 'tests' / 'shots'; SHOTS.mkdir(exist_ok=True)
 API = 'https://script.google.com/macros/s/TESTID/exec'
 W = int(sys.argv[1]) if len(sys.argv) > 1 else 390
 NING = len(sys.argv) > 2 and sys.argv[2] == 'ninguno'   # recorrido marcando «Ninguno» en RRDDTT 2
+DIR = len(sys.argv) > 2 and sys.argv[2] == 'director'   # enlace de directores (?rol=director)
 DB, DONE = {}, {'doc.ya.respondio.xx@unifranz.edu.bo'}
 ROSTER = {'doc.juanperez.lopez.ga@unifranz.edu.bo': {'nombre': 'JUAN PEREZ LOPEZ', 'sede': 'CBB', 'sede_nombre': 'Cochabamba', 'carrera_cod': 'NGE',
           'carrera': 'Negocios y Gestión Empresarial', 'plan': 2026}}
@@ -38,7 +39,7 @@ async def main():
         pg = await (await b.new_context(viewport={'width': W, 'height': 844 if W < 600 else 800}, is_mobile=W < 600, has_touch=W < 600)).new_page()
         errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.route('https://script.google.com/**', backend)
-        await pg.goto((RAIZ / 'index.html').as_uri() + '?api=' + API); await pg.wait_for_timeout(1500)
+        await pg.goto((RAIZ / 'index.html').as_uri() + '?api=' + API + ('&rol=director' if DIR else '')); await pg.wait_for_timeout(1500)
         await pg.screenshot(path=str(SHOTS / f'{W}_00_bienvenida.png'))
         await pg.evaluate("autoNext=()=>{}")
         await pg.click('#start'); await pg.wait_for_timeout(1200)
@@ -52,7 +53,9 @@ async def main():
             if k == 'review': break
             if k == 'p03':
                 for i in [0, 1]: await pg.click(f'.opt[data-i="{i}"]')
-            elif k == 'p04': assert await pg.locator('.opt').count() == 3; await pg.click('.opt[data-v="Director de carrera"]')
+            elif k == 'p04':
+                assert await pg.locator('.opt').count() == (3 if DIR else 2), 'p04: 2 roles en el enlace normal, 3 en el de directores'
+                await pg.click('.opt[data-v="' + ('Director de carrera' if DIR else 'Docente Tiempo Horario') + '"]')
             elif k == 'p05': await pg.click('.opt[data-v="Requiero más información"]')
             elif k == 'p09': await pg.click('.opt[data-v="Aprendizaje"]')
             elif k == 'p10':
@@ -100,7 +103,7 @@ async def main():
         assert len(DB) == 1, 'la respuesta no llegó al backend'
         d = list(DB.values())[0]
         print(json.dumps(d, ensure_ascii=False))
-        esper = {'p03_idx': [1, 2], 'p04': 'Director de carrera', 'p05': 'Requiero más información', 'p10': 5, 'p13_idx': [1, 3],
+        esper = {'p03_idx': [1, 2], 'p04': 'Director de carrera' if DIR else 'Docente Tiempo Horario', 'p05': 'Requiero más información', 'p10': 5, 'p13_idx': [1, 3],
                  'r01_idx': [2, 3], 'r02_idx': [2], 'r04': 'NA', 'p06': 4, 'p09': 'Aprendizaje', 'p12': 4, 'r03': 4, 'id': d['id'][:3] == 'DO-' and d['id']}
         if NING: esper.update({'r02': ['Ninguno'], 'r02_idx': [], 'r02_ninguno': True, 'r03': 1, 'r04': 'NA', 'r01_idx': [2, 3, 9]})
         for k, v in esper.items(): assert d[k] == v, (k, d[k], v)

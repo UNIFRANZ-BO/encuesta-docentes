@@ -577,11 +577,15 @@ const MODS = [
 ];
 
 /* ---------- pasos ---------- */
+// Enlace para directores (?rol=director): la pregunta 4 suma «Director de carrera». El enlace normal (el que ya
+// recibieron los docentes) sigue con los 2 roles. Las respuestas de ambos van a la misma hoja.
+const ES_DIRECTOR = (QS.get('rol') || '').toLowerCase() === 'director';
+const ROLES = ['Docente Tiempo Completo','Docente Tiempo Horario'].concat(ES_DIRECTOR ? ['Director de carrera'] : []);
 const STEPS = [
   {k:'correo', kind:'login', mod:0},
   {k:'m2', kind:'intro', mod:1},
   {k:'p03', kind:'multi', mod:1, src:'D', n:3, t:'Selecciona los semestres en los que estás dando docencia', hint:'Marca todos los que correspondan.', opts:SEMS, cols:2},
-  {k:'p04', kind:'choice', mod:1, src:'D', n:4, t:'¿Cuál es tu rol docente?', opts:['Docente Tiempo Completo','Docente Tiempo Horario','Director de carrera']},
+  {k:'p04', kind:'choice', mod:1, src:'D', n:4, t:'¿Cuál es tu rol docente?', opts:ROLES},
   {k:'p05', kind:'binary', mod:1, src:'D', n:5, t:'¿Conoces el Modelo Educativo UNIFRANZ?', opts:['Sí, lo conozco','Requiero más información'], icons:['si','info']},
   {k:'p06', kind:'scale', mod:1, src:'D', n:6, t:'¿Qué tan satisfecho estás con el desarrollo de las experiencias de aprendizaje en tus clases?', sc:SAT},
   {k:'p07', kind:'scale', mod:1, src:'D', n:7, t:'¿Las actividades experienciales del diseño instruccional (DI) son pertinentes para desarrollar las competencias de la asignatura?', sc:ACU},

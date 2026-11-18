@@ -64,6 +64,12 @@ Creada el 08-oct-2026 desde la plantilla del skill `encuesta-app-unifranz`. Lée
 - [ ] Rafael: cerrar la encuesta en la hoja vieja de la cuenta personal.
 - [ ] Opcional ofrecido: verificar el correo en segundo plano mientras el docente lo escribe (solo app).
 
+## Enlace de directores (18-nov-2026, v1.4)
+- Rafael pidió el rol «Director de carrera», pero **sin cambiar el enlace que ya tenían los docentes**. Solución: mismo formulario y misma hoja; con `?rol=director` la pregunta 4 muestra 3 roles (Docente Tiempo Completo · Docente Tiempo Horario · Director de carrera); sin el parámetro, los 2 de siempre.
+- Enlace de directores: **https://unifranz-bo.github.io/encuesta-docentes/?v=6&rol=director**. Enlace de docentes: el mismo de antes (`?v=4`/`?v=5`).
+- Script **v1.4**: `ROLES` incluye «Director de carrera» (si no, `opc_` lo guardaría en blanco). Rafael debe pegarlo + Nueva versión + Reconstruir RESUMEN **antes** de repartir el enlace de directores. Verificar con ping → `version_app:"1.4"`.
+- Los directores deben estar en P26 o en AGREGADOS; un correo que ya respondió como docente no puede responder otra vez.
+
 ## Conexión (17-nov-2026)
 - **17-nov-2026 (v1.3):** algunos usuarios veían «No pudimos conectar con el servidor». Servidor verificado sano (50 ingresos simultáneos en ≤6 s). Causa: red o navegador del usuario (Wi-Fi con filtros, navegador dentro de WhatsApp/Instagram, bloqueadores). `validar` ahora usa `consultar()`: hasta 3 intentos, cada uno JSONP y si falla `fetch` (probado con el JSONP bloqueado contra el servidor real: entra igual), mensaje «Reintentando (n de 3)» y, si todo falla, instrucciones (abrir en Chrome/Safari, cambiar de red). Enlace vigente `?v=5`.
 
